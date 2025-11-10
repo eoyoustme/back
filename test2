@@ -90,11 +90,11 @@ function CustomGitSound(soundlink, vol, filename)
     sound.SoundId = GitAud(soundlink, filename)
     sound.Parent = workspace
     sound.Name = "Music"
-    sound.Volume = 0.5
+    sound.Volume = 1
    sound:Play()
 end
 
-CustomGitSound("https://github.com/eoyoustme/back/raw/main/seek%20chase%20new.mp3?raw=true", 0.5, " Music")
+CustomGitSound("https://github.com/eoyoustme/back/raw/main/seek%20chase%20new.mp3?raw=true", 1, " Music")
 
 ---====== Hàm Jumpscare ======---
 
