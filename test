@@ -94,7 +94,7 @@ function CustomGitSound(soundlink, vol, filename)
    sound:Play()
 end
 
-CustomGitSound("https://github.com/eoyoustme/rebouna/raw/refs/heads/main/HesBehindYouRUN.mp3?raw=true", 1, " Music")
+CustomGitSound("https://github.com/eoyoustme/back/raw/main/seek%20chase%20new.mp3?raw=true", 1, " Music")
 
 ---====== Hàm Jumpscare ======---
 
