@@ -1,38 +1,50 @@
 --// Dịch vụ
 local Workspace = game:GetService("Workspace")
 
---// Hàm tải âm thanh từ GitHub
+--// Hàm tải và phát nhạc GitHub
 function GitAud(soundgit, filename)
-    local url = soundgit
-    local FileName = filename
-    writefile(FileName..".mp3", game:HttpGet(url))
-    return (getcustomasset or getsynasset)(FileName..".mp3")
+	local url = soundgit
+	local FileName = filename
+	writefile(FileName..".mp3", game:HttpGet(url))
+	return (getcustomasset or getsynasset)(FileName..".mp3")
 end
 
---// Hàm phát âm thanh
 function CustomGitSound(soundlink, vol, filename)
-    local sound = Instance.new("Sound")
-    sound.SoundId = GitAud(soundlink, filename)
-    sound.Volume = vol or 1
-    sound.Looped = false
-    sound.Parent = workspace
-    sound.Name = "SeekTheme"
-    sound:Play()
+	local sound = Instance.new("Sound")
+	sound.SoundId = GitAud(soundlink, filename)
+	sound.Volume = vol or 1
+	sound.Name = "SeekMusic"
+	sound.Parent = workspace
+	sound:Play()
+	return sound
 end
 
---// URL nhạc
-local seekMusicURL = "https://github.com/eoyoustme/back/raw/main/seek%20chase%20new.mp3?raw=true"
+--// URL nhạc seek
+local seekMusicURL = "https://github.com/eoyoustme/back/raw/main/seek%20chase%20new.mp3"
 
---// Theo dõi sự kiện Seek spawn
+--// Theo dõi Seek spawn
 Workspace.ChildAdded:Connect(function(child)
 	if string.find(string.lower(child.Name), "seek") then
-		print("[DOORS SCRIPT] Seek has spawned — playing music!")
+		print("[DOORS] Seek chase bắt đầu — phát nhạc!")
 
 		-- Xóa nhạc cũ nếu có
-		local old = workspace:FindFirstChild("SeekTheme")
+		local old = workspace:FindFirstChild("SeekMusic")
 		if old then old:Destroy() end
 
 		-- Phát nhạc
-		CustomGitSound(seekMusicURL, 5, "Seekchasenew")
+		local seekSound = CustomGitSound(seekMusicURL, 5, "SeekChaseTheme")
+
+		-- Theo dõi khi Seek bị xóa
+		child.AncestryChanged:Connect(function(_, parent)
+			if not parent then
+				print("[DOORS] Seek biến mất — dừng nhạc.")
+				if seekSound and seekSound:IsDescendantOf(workspace) then
+					seekSound:Stop()
+					task.wait(0.5)
+					seekSound:Destroy()
+				end
+			end
+		end)
 	end
 end)
+
