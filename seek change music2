@@ -1,6 +1,9 @@
 --// Dịch vụ
 local Workspace = game:GetService("Workspace")
 
+--// Link nhạc
+local seekMusicURL = "https://github.com/eoyoustme/back/raw/main/seek%20chase%20new.mp3?raw=true"
+
 --// Hàm tải và phát nhạc GitHub
 function GitAud(soundgit, filename)
 	local url = soundgit
@@ -19,22 +22,16 @@ function CustomGitSound(soundlink, vol, filename)
 	return sound
 end
 
---// URL nhạc seek
-local seekMusicURL = "https://github.com/eoyoustme/back/raw/main/seek%20chase%20new.mp3"
-
 --// Theo dõi Seek spawn
 Workspace.ChildAdded:Connect(function(child)
 	if string.find(string.lower(child.Name), "seek") then
 		print("[DOORS] Seek chase bắt đầu — phát nhạc!")
 
-		-- Xóa nhạc cũ nếu có
 		local old = workspace:FindFirstChild("SeekMusic")
 		if old then old:Destroy() end
 
-		-- Phát nhạc
 		local seekSound = CustomGitSound(seekMusicURL, 5, "SeekChaseTheme")
 
-		-- Theo dõi khi Seek bị xóa
 		child.AncestryChanged:Connect(function(_, parent)
 			if not parent then
 				print("[DOORS] Seek biến mất — dừng nhạc.")
@@ -47,4 +44,3 @@ Workspace.ChildAdded:Connect(function(child)
 		end)
 	end
 end)
-
