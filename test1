@@ -90,11 +90,11 @@ function CustomGitSound(soundlink, vol, filename)
     sound.SoundId = GitAud(soundlink, filename)
     sound.Parent = workspace
     sound.Name = "Music"
-    sound.Volume = 2
+    sound.Volume = 0.5
    sound:Play()
 end
 
-CustomGitSound("https://github.com/eoyoustme/back/raw/main/seek%20chase%20new.mp3?raw=true", 1, " Music")
+CustomGitSound("https://github.com/eoyoustme/back/raw/main/seek%20chase%20new.mp3?raw=true", 0.5, " Music")
 
 ---====== Hàm Jumpscare ======---
 
@@ -127,7 +127,7 @@ local function executeRealJumpscare()
     task.wait(0.5) -- Thời gian hiển thị của ảnh Deer God ban đầu
 
     -- Hiệu ứng màu sắc và độ tương phản khi jumpscare
-    colorCorrection.TintColor = Color3.fromRGB(250, 0, 0)
+    colorCorrection.TintColor = Color3.fromRGB(255, 255, 255)
     colorCorrection.Contrast = 10
     TweenService:Create(colorCorrection, TweenInfo.new(0.25), {Contrast = 0}):Play()
     TweenService:Create(colorCorrection, TweenInfo.new(0.5), {TintColor = originalTintColor}):Play() -- Màu sắc trở lại bình thường
