@@ -1,0 +1,38 @@
+--// Dịch vụ
+local Workspace = game:GetService("Workspace")
+
+--// Hàm tải âm thanh từ GitHub
+function GitAud(soundgit, filename)
+    local url = soundgit
+    local FileName = filename
+    writefile(FileName..".mp3", game:HttpGet(url))
+    return (getcustomasset or getsynasset)(FileName..".mp3")
+end
+
+--// Hàm phát âm thanh
+function CustomGitSound(soundlink, vol, filename)
+    local sound = Instance.new("Sound")
+    sound.SoundId = GitAud(soundlink, filename)
+    sound.Volume = vol or 1
+    sound.Looped = false
+    sound.Parent = workspace
+    sound.Name = "SeekTheme"
+    sound:Play()
+end
+
+--// URL nhạc
+local seekMusicURL = "https://github.com/eoyoustme/back/raw/main/seek%20chase%20new.mp3?raw=true"
+
+--// Theo dõi sự kiện Seek spawn
+Workspace.ChildAdded:Connect(function(child)
+	if string.find(string.lower(child.Name), "seek") then
+		print("[DOORS SCRIPT] Seek has spawned — playing music!")
+
+		-- Xóa nhạc cũ nếu có
+		local old = workspace:FindFirstChild("SeekTheme")
+		if old then old:Destroy() end
+
+		-- Phát nhạc
+		CustomGitSound(seekMusicURL, 5, "Seekchasenew")
+	end
+end)
