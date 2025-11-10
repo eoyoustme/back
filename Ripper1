@@ -308,7 +308,7 @@ CustomGitSound("https://github.com/eoyoustme2/-i-lost-my-account-is-eoyoustme-/b
                 imageLabel.Image = jumpscareImage2
                 task.wait(0)
             end
-            imageLabel.Visible = false
+            imageLabel.Visible = true
         end)
 
         task.wait(flashDuration + 0.5)
