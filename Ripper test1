@@ -290,7 +290,7 @@ MuteAllSoundsInModel(entityModel)
 -- 🔊 Phát âm thanh jumpscare từ GitHub
 CustomGitSound("https://github.com/eoyoustme2/-i-lost-my-account-is-eoyoustme-/blob/main/Kill_with_static.mp3.mpeg.wav?raw=true", 1, "Music")
 
-wait(1)
+wait(0)
 
         -- UI Jumpscare nháy ảnh
         local screenGui = Instance.new("ScreenGui")
