@@ -1,3 +1,4 @@
+-- 🧊 Frost Entity Script (phiên bản bật toàn bộ hiệu ứng)
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 
 function GetRoom()
@@ -68,27 +69,24 @@ function LoadCustomInstance(source, parent)
 end
 
 -- 🔽 Tải Frost entity từ GitHub
-local s = LoadCustomInstance("https://github.com/eoyoustme/back/raw/refs/heads/main/Frostbote.rbxm", workspace)
+local s = LoadCustomInstance("https://github.com/eoyoustme/back/raw/refs/heads/main/frs.rbxm", workspace)
 if not s then
     warn("Không thể tải Frost entity.")
     return
 end
 
 local entity = s:FindFirstChildWhichIsA("BasePart")
-entity.CFrame = GetRoom():WaitForChild("RoomEntrance").CFrame * CFrame.new(0, 5, -15)
+entity.CFrame = GetRoom():WaitForChild("RoomEntrance").CFrame * CFrame.new(0, 2.5, -15)
 entity.Part.CFrame = entity.CFrame
 
--- 💡 Thêm ánh sáng mạnh lúc xuất hiện
+-- 💡 Ánh sáng xuất hiện
 local pointLight = Instance.new("PointLight")
 pointLight.Color = Color3.new(255, 255, 255)
 pointLight.Range = 60
 pointLight.Brightness = 99999
 pointLight.Parent = entity
 
--- Làm giảm độ sáng dần trong 6 giây
-tweenservice:Create(pointLight, TweenInfo.new(3), {
-    Brightness = 0
-}):Play()
+tweenservice:Create(pointLight, TweenInfo.new(3), {Brightness = 0}):Play()
 
 -- 🎵 Âm thanh xuất hiện
 local sound = Instance.new("Sound")
@@ -107,7 +105,7 @@ tweenservice:Create(frost, TweenInfo.new(10), {
     Contrast = 0.2
 }):Play()
 
--- Tắt hiệu ứng ban đầu
+-- ❌ Tắt hiệu ứng ban đầu
 for _, v in ipairs({"face", "Heylois", "BlackTrai2l", "BlackTrai3l"}) do
     if entity:FindFirstChild("Attachment") and entity.Attachment:FindFirstChild(v) then
         entity.Attachment[v].Enabled = false
@@ -116,14 +114,31 @@ end
 
 wait(8)
 
--- Bật hiệu ứng trở lại
+-- ✅ Bật lại tất cả hiệu ứng (Attachment + Particle)
+-- Bật lại 4 hiệu ứng trong Attachment
 for _, v in ipairs({"face", "Heylois", "BlackTrai2l", "BlackTrai3l"}) do
     if entity:FindFirstChild("Attachment") and entity.Attachment:FindFirstChild(v) then
         entity.Attachment[v].Enabled = true
     end
 end
 
--- Phát âm thanh
+-- Bật tất cả particle trong Frostbite > FrostyNew > part
+local frostbiteModel = s:FindFirstChild("Frostbite")
+if frostbiteModel then
+    local frostyNew = frostbiteModel:FindFirstChild("FrostyNew")
+    if frostyNew then
+        local frostPart = frostyNew:FindFirstChild("part")
+        if frostPart then
+            for _, particle in ipairs(frostPart:GetDescendants()) do
+                if particle:IsA("ParticleEmitter") then
+                    particle.Enabled = true
+                end
+            end
+        end
+    end
+end
+
+-- 🎵 Phát âm thanh ambience
 pcall(function() entity.Ambience:Play() end)
 pcall(function() entity.AmbienceFar:Play() end)
 
@@ -146,16 +161,32 @@ end)
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 dmg = false
 
+-- Tắt các hiệu ứng khi rời phòng
 for _, v in ipairs({"face", "Heylois", "BlackTrai2l", "BlackTrai3l"}) do
     if entity:FindFirstChild("Attachment") and entity.Attachment:FindFirstChild(v) then
         entity.Attachment[v].Enabled = false
     end
 end
 
+-- Tắt particle trong Frostbite > FrostyNew > part
+if frostbiteModel then
+    local frostyNew = frostbiteModel:FindFirstChild("FrostyNew")
+    if frostyNew then
+        local frostPart = frostyNew:FindFirstChild("part")
+        if frostPart then
+            for _, particle in ipairs(frostPart:GetDescendants()) do
+                if particle:IsA("ParticleEmitter") then
+                    particle.Enabled = false
+                end
+            end
+        end
+    end
+end
+
+-- Âm thanh dừng và biến mất
 pcall(function() entity.Ambience:Stop() end)
 pcall(function() entity.AmbienceFar:Stop() end)
 
--- Âm thanh biến mất
 local des = Instance.new("Sound")
 des.SoundId = "rbxassetid://111715441853991"
 des.Looped = false
@@ -166,7 +197,7 @@ des:Play()
 wait(5)
 s:Destroy()
 
--- 🧊 Hoàn tác hiệu ứng
+-- 🌈 Hoàn tác hiệu ứng lạnh
 tweenservice:Create(frost, TweenInfo.new(5), {
     TintColor = Color3.fromRGB(255, 255, 255),
     Saturation = 0,
