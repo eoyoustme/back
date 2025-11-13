@@ -285,7 +285,7 @@ Jumpscare:Play()
 -- 🔇 Tắt tất cả âm thanh trong model (kể cả trong Part con)
 MuteAllSoundsInModel(entityModel)
 
-wait(0)
+wait(1)
 
         -- UI Jumpscare nháy ảnh
         local screenGui = Instance.new("ScreenGui")
