@@ -415,7 +415,7 @@ local jumpscareImage2 = "rbxassetid://236542974"
 local flashDuration = 1.5
 local flashStartTime = tick()
 
-local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
+local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Linear)
 
 local function flashImage(img)
     imageLabel.Image = img
