@@ -335,17 +335,6 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 				end
 			end)
 
-        local ripeAttachment = primaryPart:FindFirstChild("Attachment", true)
-        if ripeAttachment and ripeAttachment:IsA("Attachment") then
-            for _, child in ipairs(ripeAttachment:GetChildren()) do
-                if child:IsA("ParticleEmitter") then
-                    child.Texture = "rbxassetid://12737595614"  -- ID texture của bạn
-                    child.Squash = 0
-                    print("Đã đổi texture ParticleEmitter:", child.Name)
-                end
-            end
-        end
-
 wait(0.1)
   local function SetAllParticlesTimeScale(model, timescale)
             for _, descendant in ipairs(model:GetDescendants()) do
