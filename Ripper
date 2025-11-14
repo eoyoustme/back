@@ -409,7 +409,7 @@ imageLabel.Parent = screenGui
 local jumpscareImage1 = "rbxassetid://94547864377343"
 local jumpscareImage2 = "rbxassetid://236542974"
 
-local flashDuration = 1.5
+local flashDuration = 1.2
 
 ----------------------------------------------------
 -- 1) FADE-IN (1 lần duy nhất, 1 → 0)
