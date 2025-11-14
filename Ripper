@@ -9,7 +9,7 @@ local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/Regul
 local entity = spawner.Create({
 	Entity = {
 		Name = "Ripper",
-		Asset = "rbxassetid://80001199553988",
+		Asset = "rbxassetid://74817456848770",
 		HeightOffset = 2
 	},
 	Lights = {
@@ -335,6 +335,18 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 				end
 			end)
 
+        local ripeAttachment = primaryPart:FindFirstChild("Attachment", true)
+        if ripeAttachment and ripeAttachment:IsA("Attachment") then
+            for _, child in ipairs(ripeAttachment:GetChildren()) do
+                if child:IsA("ParticleEmitter") then
+                    child.Texture = "rbxassetid://12737595614"  -- ID texture của bạn
+                    child.Squash = 0
+                    print("Đã đổi texture ParticleEmitter:", child.Name)
+                end
+            end
+        end
+
+wait(0.1)
   local function SetAllParticlesTimeScale(model, timescale)
             for _, descendant in ipairs(model:GetDescendants()) do
                 if descendant:IsA("ParticleEmitter") then
@@ -469,3 +481,33 @@ end)
 ---====== Run entity ======---
 
 entity:Run()
+-- i lve this
+ local entityModel = workspace:FindFirstChild("Threat")
+    
+    if entityModel and entityModel:IsA("Model") then
+        -- Tìm Part tên "DissolveNew" trong model
+        local dissolvePart = entityModel:FindFirstChild("Ripper")
+        if dissolvePart and dissolvePart:IsA("BasePart") then
+            -- Tìm Attachment tên "Attachment" trong Part
+            local attachment = dissolvePart:FindFirstChild("Attachment")
+            if attachment and attachment:IsA("Attachment") then
+                -- Tìm ParticleEmitter trong Attachment
+                local particle = attachment:FindFirstChildOfClass("ParticleEmitter")
+                if particle then
+                    -- Đổi size của ParticleEmitter thành 6
+                    particle.Rate = 150
+                    particle.Size = 7
+                    print("ParticleEmitter size set to 6")
+                else
+                    warn("Không tìm thấy ParticleEmitter trong Attachment")
+                end
+            else
+                warn("Không tìm thấy Attachment trong DissolveNew")
+            end
+        else
+            warn("Không tìm thấy Part 'DissolveNew' trong model Dissolve")
+        end
+    else
+        warn("Không tìm thấy model 'Dissolve' trong workspace")
+    end
+end)
