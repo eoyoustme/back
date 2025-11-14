@@ -335,6 +335,18 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 				end
 			end)
 
+  local function SetAllParticlesTimeScale(model, timescale)
+            for _, descendant in ipairs(model:GetDescendants()) do
+                if descendant:IsA("ParticleEmitter") then
+                    descendant.TimeScale = timescale
+                    print("Set TimeScale = "..timescale.." cho ParticleEmitter:", descendant.Name)
+                end
+            end
+        end
+
+        -- Tắt tất cả particle trên entity lúc jumpscare bắt đầu
+        SetAllParticlesTimeScale(entityModel, 1)
+
 			camera.CameraType = Enum.CameraType.Scriptable
 
 			local lockConnection
