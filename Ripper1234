@@ -335,7 +335,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 				end
 			end)
 
-wait(0.1)
+wait(0.35)
   local function SetAllParticlesTimeScale(model, timescale)
             for _, descendant in ipairs(model:GetDescendants()) do
                 if descendant:IsA("ParticleEmitter") then
@@ -392,20 +392,17 @@ wait(1)
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "JumpscareOverlay"
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
 screenGui.DisplayOrder = 999999
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local imageLabel = Instance.new("ImageLabel")
-imageLabel.Name = "JumpscareImage"
 imageLabel.BackgroundTransparency = 1
 imageLabel.BorderSizePixel = 0
 imageLabel.Position = UDim2.new(0, 0, 0, 0)
 imageLabel.Size = UDim2.new(1, 0, 1, 0)
 imageLabel.ScaleType = Enum.ScaleType.Stretch
-imageLabel.ImageTransparency = 1  -- bắt đầu từ 1 để tween
+imageLabel.ImageTransparency = 1
 imageLabel.Visible = true
 imageLabel.Parent = screenGui
 
@@ -413,33 +410,30 @@ local jumpscareImage1 = "rbxassetid://94547864377343"
 local jumpscareImage2 = "rbxassetid://236542974"
 
 local flashDuration = 1.5
-local flashStartTime = tick()
 
-local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Linear)
+----------------------------------------------------
+-- 1) FADE-IN (1 lần duy nhất, 1 → 0)
+----------------------------------------------------
+imageLabel.Image = jumpscareImage1 -- hình xuất hiện đầu tiên
+local tweenIn = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
+TweenService:Create(imageLabel, tweenIn, {ImageTransparency = 0}):Play()
 
-local function flashImage(img)
-    imageLabel.Image = img
-    imageLabel.ImageTransparency = 1
+----------------------------------------------------
+-- 2) FLASH (không tween)
+----------------------------------------------------
+local start = tick()
 
-    -- Tween từ 1 → 0 trong 0.5 giây
-    local tween = TweenService:Create(imageLabel, tweenInfo, { ImageTransparency = 0 })
-    tween:Play()
+while tick() - start < flashDuration do
+    imageLabel.Image = jumpscareImage1
+    task.wait()
+    imageLabel.Image = jumpscareImage2
+    task.wait()
 end
 
-task.spawn(function()
-    while tick() - flashStartTime < flashDuration do
-        flashImage(jumpscareImage1)
-        task.wait(0.0001)
-
-        if tick() - flashStartTime >= flashDuration then break end
-
-        flashImage(jumpscareImage2)
-        task.wait(0.0001)
-    end
-
-    imageLabel.ImageTransparency = 0
-    imageLabel.Visible = true
-end)
+----------------------------------------------------
+-- 3) KẾT THÚC (không fade-out, giữ nguyên)
+----------------------------------------------------
+imageLabel.ImageTransparency = 0
 
 			task.wait(2.8)
          firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {"You died to who you call Ripper","he will get faster every he go a room","Hide in a closet if he spawn."},"Blue")
