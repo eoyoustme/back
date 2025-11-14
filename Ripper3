@@ -42,7 +42,7 @@ local entity = spawner.Create({
 	},
 	Damage = {
 		Enabled = true,
-		Range = 100,
+		Range = 40,
 		Amount = 0.01
 	},
 	Crucifixion = {
@@ -116,7 +116,7 @@ end)
 entity:SetCallback("OnEnterRoom", function(room, firstTime)
     if firstTime == true then
         print("Entity has entered room: ".. room.Name.. " for the first time")
-                    entity.Config.Movement.Speed = entity.Config.Movement.Speed * 1.2
+                    entity.Config.Movement.Speed = entity.Config.Movement.Speed * 1.0001
     else
         print("Entity has entered room: ".. room.Name.. " again")
     end
@@ -358,7 +358,7 @@ end
 -- Lấy âm thanh từ GitHub
 local Jumpscare = GetGitSound("https://github.com/eoyoustme/back/raw/main/Kill_with_static.mp3","Kill")
 Jumpscare.Parent = workspace
-Jumpscare.Volume = 4
+Jumpscare.Volume = 1
 Jumpscare.PlaybackSpeed = 1
 
 -- 🔇 TẮT TẤT CẢ ÂM THANH TRONG ENTITY MODEL VÀ PART
@@ -396,7 +396,7 @@ wait(1)
         local jumpscareImage1 = "rbxassetid://94547864377343"
         local jumpscareImage2 = "rbxassetid://236542974"
 
-        local flashDuration = 1.8
+        local flashDuration = 1.5
         local flashStartTime = tick()
 
         task.spawn(function()
