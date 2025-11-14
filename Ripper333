@@ -345,7 +345,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
         end
 
         -- Tắt tất cả particle trên entity lúc jumpscare bắt đầu
-        SetAllParticlesTimeScale(entityModel, 1)
+        SetAllParticlesTimeScale(entityModel, 0)
 
 			camera.CameraType = Enum.CameraType.Scriptable
 
