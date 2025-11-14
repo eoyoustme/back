@@ -388,40 +388,58 @@ Jumpscare:Play()
 wait(1)
 
 			-- ????? UI Jumpscare
-			local screenGui = Instance.new("ScreenGui")
-        screenGui.Name = "JumpscareOverlay"
-        screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        screenGui.ResetOnSpawn = false
-        screenGui.IgnoreGuiInset = true
-        screenGui.DisplayOrder = 999999
-        screenGui.Parent = player:WaitForChild("PlayerGui")
+			local TweenService = game:GetService("TweenService")
 
-        local imageLabel = Instance.new("ImageLabel")
-        imageLabel.Name = "JumpscareImage"
-        imageLabel.BackgroundTransparency = 1
-        imageLabel.BorderSizePixel = 0
-        imageLabel.Position = UDim2.new(0, 0, 0, 0)
-        imageLabel.Size = UDim2.new(1, 0, 1, 0)
-        imageLabel.ScaleType = Enum.ScaleType.Stretch
-        imageLabel.Visible = true
-        imageLabel.Parent = screenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "JumpscareOverlay"
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 999999
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
-        local jumpscareImage1 = "rbxassetid://94547864377343"
-        local jumpscareImage2 = "rbxassetid://236542974"
+local imageLabel = Instance.new("ImageLabel")
+imageLabel.Name = "JumpscareImage"
+imageLabel.BackgroundTransparency = 1
+imageLabel.BorderSizePixel = 0
+imageLabel.Position = UDim2.new(0, 0, 0, 0)
+imageLabel.Size = UDim2.new(1, 0, 1, 0)
+imageLabel.ScaleType = Enum.ScaleType.Stretch
+imageLabel.ImageTransparency = 1  -- bắt đầu từ 1 để tween
+imageLabel.Visible = true
+imageLabel.Parent = screenGui
 
-        local flashDuration = 1.5
-        local flashStartTime = tick()
+local jumpscareImage1 = "rbxassetid://94547864377343"
+local jumpscareImage2 = "rbxassetid://236542974"
 
-        task.spawn(function()
-            while tick() - flashStartTime < flashDuration do
-                imageLabel.Image = jumpscareImage1
-                task.wait(0)
-                if tick() - flashStartTime >= flashDuration then break end
-                imageLabel.Image = jumpscareImage2
-                task.wait(0)
-            end
-            imageLabel.Visible = true
-        end)
+local flashDuration = 1.5
+local flashStartTime = tick()
+
+local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
+
+local function flashImage(img)
+    imageLabel.Image = img
+    imageLabel.ImageTransparency = 1
+
+    -- Tween từ 1 → 0 trong 0.5 giây
+    local tween = TweenService:Create(imageLabel, tweenInfo, { ImageTransparency = 0 })
+    tween:Play()
+end
+
+task.spawn(function()
+    while tick() - flashStartTime < flashDuration do
+        flashImage(jumpscareImage1)
+        task.wait(0.0001)
+
+        if tick() - flashStartTime >= flashDuration then break end
+
+        flashImage(jumpscareImage2)
+        task.wait(0.0001)
+    end
+
+    imageLabel.ImageTransparency = 0
+    imageLabel.Visible = true
+end)
 
 			task.wait(2.8)
          firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {"You died to who you call Ripper","he will get faster every he go a room","Hide in a closet if he spawn."},"Blue")
