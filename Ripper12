@@ -89,10 +89,10 @@ task.wait(0.5)
 
 -- Danh sách các màu d? d?i
 local colors = {
-    Color3.fromRGB(1, 0, 0),   -- Vàng
-    Color3.fromRGB(1 , 0, 0),     -- Xanh duong
-    Color3.fromRGB(1, 0, 0),     -- Xanh lá
-    Color3.fromRGB(1, 0, 0)  -- H?ng
+    Color3.fromRGB(255, 0, 0),   -- Vàng
+    Color3.fromRGB(255 , 0, 0),     -- Xanh duong
+    Color3.fromRGB(255, 0, 0),     -- Xanh lá
+    Color3.fromRGB(255, 0, 0)  -- H?ng
 }
 
 -- L?p 4 l?n d?i màu
