@@ -409,7 +409,7 @@ imageLabel.Parent = screenGui
 local jumpscareImage1 = "rbxassetid://94547864377343"
 local jumpscareImage2 = "rbxassetid://236542974"
 
-local flashDuration = 0.6
+local flashDuration = 1.4
 
 ----------------------------------------------------
 -- 1) FADE-IN (1 lần duy nhất, 1 → 0)
@@ -433,7 +433,7 @@ end
 ----------------------------------------------------
 -- 3) KẾT THÚC (không fade-out, giữ nguyên)
 ----------------------------------------------------
-imageLabel.ImageTransparency = 0
+imageLabel.ImageTransparency = 1
 
 			task.wait(2.8)
          firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {"You died to who you call Ripper","he will get faster every he go a room","Hide in a closet if he spawn."},"Blue")
