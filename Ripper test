@@ -288,42 +288,52 @@ MuteAllSoundsInModel(entityModel)
 wait(1)
 
         -- UI Jumpscare nháy ảnh
-        local screenGui = Instance.new("ScreenGui")
-        screenGui.Name = "JumpscareOverlay"
-        screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        screenGui.ResetOnSpawn = false
-        screenGui.IgnoreGuiInset = true
-        screenGui.DisplayOrder = 999999
-        screenGui.Parent = player:WaitForChild("PlayerGui")
+       local TweenService = game:GetService("TweenService")
 
-        local imageLabel = Instance.new("ImageLabel")
-        imageLabel.Name = "JumpscareImage"
-        imageLabel.BackgroundTransparency = 1
-        imageLabel.BorderSizePixel = 0
-        imageLabel.Position = UDim2.new(0, 0, 0, 0)
-        imageLabel.Size = UDim2.new(1, 0, 1, 0)
-        imageLabel.ScaleType = Enum.ScaleType.Stretch
-        imageLabel.Visible = true
-        imageLabel.Parent = screenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "JumpscareOverlay"
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 999999
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
-        local jumpscareImage1 = "rbxassetid://94547864377343"
-        local jumpscareImage2 = "rbxassetid://236542974"
+local imageLabel = Instance.new("ImageLabel")
+imageLabel.BackgroundTransparency = 1
+imageLabel.BorderSizePixel = 0
+imageLabel.Position = UDim2.new(0, 0, 0, 0)
+imageLabel.Size = UDim2.new(1, 0, 1, 0)
+imageLabel.ScaleType = Enum.ScaleType.Stretch
+imageLabel.ImageTransparency = 1
+imageLabel.Visible = true
+imageLabel.Parent = screenGui
 
-        local flashDuration = 1.2
-        local flashStartTime = tick()
+local jumpscareImage1 = "rbxassetid://94547864377343"
+local jumpscareImage2 = "rbxassetid://236542974"
 
-        task.spawn(function()
-            while tick() - flashStartTime < flashDuration do
-                imageLabel.Image = jumpscareImage1
-                task.wait(0)
-                if tick() - flashStartTime >= flashDuration then break end
-                imageLabel.Image = jumpscareImage2
-                task.wait(0)
-            end
-            imageLabel.Visible = true
-        end)
+local flashDuration = 1.4
 
-        task.wait(flashDuration + 0.5)
+----------------------------------------------------
+-- 1) FADE-IN (1 lần duy nhất, 1 → 0)
+----------------------------------------------------
+imageLabel.Image = jumpscareImage1 -- hình xuất hiện đầu tiên
+local tweenIn = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
+TweenService:Create(imageLabel, tweenIn, {ImageTransparency = 0}):Play()
+
+----------------------------------------------------
+-- 2) FLASH (không tween)
+----------------------------------------------------
+local start = tick()
+
+while tick() - start < flashDuration do
+    imageLabel.Image = jumpscareImage1
+    task.wait()
+    imageLabel.Image = jumpscareImage2
+    task.wait()
+end
+
+----------------------------------------------------
+-- 3) KẾT THÚC (không fade-out, giữ nguyên)
+----------------------------------------------------
+imageLabel.ImageTransparency = 1
 
         -- Giết người chơi ngay khi jumpscare kết thúc
         if humanoid then
