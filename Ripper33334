@@ -130,7 +130,7 @@ camShake:Start()
 
     workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:WaitForChild("Door").ClientOpen:FireServer()
 
-    for _, v in pairs(workspace:WaitForChild("RipperMovings"):GetDescendants()) do
+    for _, v in pairs(workspace:WaitForChild("Ripper"):GetDescendants()) do
         if v:IsA("Sound") then v:Destroy() end
     end
 
