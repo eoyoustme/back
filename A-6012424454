@@ -1,4 +1,3 @@
-
 -- Import spawner
 local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
 local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
@@ -10,7 +9,10 @@ local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local camera = Workspace.CurrentCamera
 
--- Khởi tạo entity
+-- =====================================
+-- ============ ENTITY SETUP ===========
+-- =====================================
+
 local entity = spawner.Create({
 	Entity = {
 		Name = "A60",
@@ -53,47 +55,55 @@ local entity = spawner.Create({
 	},
 	Death = {
 		Type = "Guiding",
-		Hints = {"Death", "Hints", "Go", "Here"},
+		Hints = {"Death","Hints","Go","Here"},
 		Cause = ""
 	}
 })
 
--- Hiệu ứng ánh sáng
+-- =====================================
+-- ========= LIGHTING EFFECT ===========
+-- =====================================
+
 local lighting = game.Lighting
 lighting.MainColorCorrection.TintColor = Color3.fromRGB(255, 0, 0)
 lighting.MainColorCorrection.Contrast = 0.2
-TweenService:Create(lighting.MainColorCorrection, TweenInfo.new(2.5), {Contrast = 0}):Play()
-TweenService:Create(lighting.MainColorCorrection, TweenInfo.new(20), {TintColor = Color3.fromRGB(255, 255, 255)}):Play()
 
--- Camera Shake
-local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
-local camara = game.Workspace.CurrentCamera
-local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
- camara.CFrame = camara.CFrame * shakeCf
-end)
-camShake:Start()
-camShake:ShakeOnce(40,70,0,4,2,12)
-local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
-local camara = game.Workspace.CurrentCamera
+TweenService:Create(lighting.MainColorCorrection, TweenInfo.new(2.5), {Contrast = 0}):Play()
+TweenService:Create(lighting.MainColorCorrection, TweenInfo.new(20), {TintColor = Color3.fromRGB(255,255,255)}):Play()
+
+-- =====================================
+-- =========== CAMERA SHAKE ============
+-- =====================================
 
 local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(cf)
-	camara.CFrame = camara.CFrame * cf
+	camera.CFrame = camera.CFrame * cf
 end)
 
 camShake:Start()
 camShake:Shake(CameraShaker.Presets.Earthquake)
 
--- ================== ON SPAWN ==================
+-- =====================================
+-- =========== ON SPAWNED ==============
+-- =====================================
+
+local running = false -- phải đặt ngoài callback để OnDespawning điều khiển
+
 entity:SetCallback("OnSpawned", function()
- local part = workspace:WaitForChild("A60")
+	running = true
+
+	local part = workspace:WaitForChild("A60")
 	local object = part:WaitForChild("RushNew")
 	local attachment = object:WaitForChild("Main")
 	local emitter = attachment:FindFirstChildWhichIsA("ParticleEmitter")
 
+	if not emitter then
+		warn("❌ Không tìm thấy ParticleEmitter trong RushNew.Main")
+		return
+	end
+
 	object.CanCollide = false
 
-	local running = true
-	spawn(function()
+	task.spawn(function()
 		while running and emitter and emitter:IsDescendantOf(workspace) do
 			local textures = {
 				"rbxassetid://12145534911",
@@ -106,6 +116,7 @@ entity:SetCallback("OnSpawned", function()
 				"rbxassetid://11378285585"
 			}
 			for _, tex in ipairs(textures) do
+				if not running then break end
 				emitter.Texture = tex
 				task.wait()
 			end
@@ -113,37 +124,41 @@ entity:SetCallback("OnSpawned", function()
 	end)
 end)
 
-	entity:SetCallback("OnDespawning", function()
-		running = false
+-- =====================================
+-- ========= ON DESPAWNING =============
+-- =====================================
 
-		local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
-			camera.CFrame = camera.CFrame * shakeCf
-		end)
-		camShake:Start()
-		camShake:ShakeOnce(50, 50, 0, 2, 1, 6)
+entity:SetCallback("OnDespawning", function()
+	running = false	
 
-		local tints = {
-			{Color = Color3.fromRGB(30, 30, 30), Time = 2},
-			{Color = Color3.fromRGB(60, 60, 60), Time = 2},
-			{Color = Color3.fromRGB(120, 120, 120), Time = 5},
-			{Color = Color3.fromRGB(255, 255, 255), Time = 5}
-		}
-
-		for _, tint in ipairs(tints) do
-			local t = TweenService:Create(lighting.MainColorCorrection, TweenInfo.new(tint.Time), {TintColor = tint.Color})
-			t:Play()
-			task.wait(tint.Time)
-		end
+	-- Camera shake khi biến mất
+	local shake2 = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(cf)
+		camera.CFrame = camera.CFrame * cf
 	end)
+	shake2:Start()
+	shake2:ShakeOnce(50,50,0,2,1,6)
+
+	-- Light fade out
+	local tints = {
+		{Color = Color3.fromRGB(30,30,30), Time = 2},
+		{Color = Color3.fromRGB(60,60,60), Time = 2},
+		{Color = Color3.fromRGB(120,120,120), Time = 5},
+		{Color = Color3.fromRGB(255,255,255), Time = 5}
+	}
+
+	for _, t in ipairs(tints) do
+		local tween = TweenService:Create(lighting.MainColorCorrection, TweenInfo.new(t.Time), {TintColor = t.Color})
+		tween:Play()
+		task.wait(t.Time)
+	end
 end)
 
--- ================== ON DAMAGE ==================
-entity:SetCallback("OnDamagePlayer", function(newHealth)
-	if newHealth == 0 then
-		warn("Player chết")
-		return
-	end
+-- =====================================
+-- ========= ON DAMAGE PLAYER ===========
+-- =====================================
 
+entity:SetCallback("OnDamagePlayer", function(newHealth)
+	if newHealth == 0 then return end
 	task.spawn(function()
 		local character = player.Character or player.CharacterAdded:Wait()
 		local humanoid = character:WaitForChild("Humanoid")
@@ -226,5 +241,5 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 	end)
 end)
 
--- ================== CHẠY ENTITY ==================
+
 entity:Run()
