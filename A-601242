@@ -13,7 +13,7 @@ local camera = Workspace.CurrentCamera
 -- Khởi tạo entity
 local entity = spawner.Create({
 	Entity = {
-		Name = "A-60",
+		Name = "A60",
 		Asset = "rbxassetid://76902617348604",
 		HeightOffset = 0
 	},
@@ -85,7 +85,7 @@ camShake:Shake(CameraShaker.Presets.Earthquake)
 
 -- ================== ON SPAWN ==================
 entity:SetCallback("OnSpawned", function()
-    local part = workspace:WaitForChild("A-60")
+    local part = workspace:WaitForChild("A60")
     local object = part:WaitForChild("RushNew")
     local attachment = object:WaitForChild("Main")
 
