@@ -124,43 +124,6 @@ end)
 
 entity:SetCallback("OnDespawning", function()
     print("Entity is despawning")
-camShake:Start()
-    camShake:ShakeOnce(10, 15, 0, 5.5, 1, 0)
-    camShake:Shake(CameraShaker.Presets.Earthquake)
-
-    workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:WaitForChild("Door").ClientOpen:FireServer()
-
-    for _, v in pairs(workspace:WaitForChild("Ripper"):GetDescendants()) do
-        if v:IsA("Sound") then v:Destroy() end
-    end
-
-    tweenservice:Create(colorEffect, TweenInfo.new(10), {
-        TintColor = Color3.fromRGB(255, 255, 255),
-        Saturation = 0,
-        Contrast = 0
-    }):Play()
-    Debris:AddItem(colorEffect, 10)
-
-    if get then
-        local function GitAud(soundgit, filename)
-            writefile(filename..".mp3", game:HttpGet(soundgit))
-            return (getcustomasset or getsynasset)(filename..".mp3")
-        end
-
-        local function CustomGitSound(soundlink, vol, filename)
-            local sound = Instance.new("Sound")
-            sound.SoundId = GitAud(soundlink, filename)
-            sound.Parent = workspace
-            sound.Volume = vol
-            sound.Name = "DoorBreaker"
-            sound:Play()
-        end
-
-        CustomGitSound("https://github.com/Darker-TheDarkestGuy/DOORS/raw/refs/heads/main/.mp3?raw=true", 1, "DoorBreaker")
-
-        camShake:Start()
-        camShake:ShakeOnce(20, 5, 5, 3, 2, 1)
-
         local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Idk-lol2/a-60aa/refs/heads/main/fix%20bage.txt"))()
         achievementGiver({
             Title = "Torn Apart",
@@ -169,7 +132,6 @@ camShake:Start()
             Image = "rbxassetid://"
         })
     end
-end)
 end)
 
 entity:SetCallback("OnDespawned", function()
