@@ -124,18 +124,17 @@ end)
 
 entity:SetCallback("OnDespawning", function()
     print("Entity is despawning")
-
-    local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Idk-lol2/a-60aa/refs/heads/main/fix%20bage.txt"))()
-    achievementGiver({
-        Title = "Torn Apart",
-        Desc = "Don't Leave Too Early.",
-        Reason = "Encounter Ripper",
-        Image = "rbxassetid://"
-    })
 end)
 
 entity:SetCallback("OnDespawned", function()
     print("Entity has despawned")
+  local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Idk-lol2/a-60aa/refs/heads/main/fix%20bage.txt"))()
+    achievementGiver({
+        Title = "Torn Apart",
+        Desc = "Don't Leave Too Early.",
+        Reason = "Encounter Ripper",
+        Image = "rbxassetid://125217047990746"
+    })
 end)
 
 local TweenService = game:GetService("TweenService")
