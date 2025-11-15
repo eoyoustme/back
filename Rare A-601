@@ -144,86 +144,109 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 		warn("Player chết")
 		return
 	end
-
 	task.spawn(function()
-		local character = player.Character or player.CharacterAdded:Wait()
-		local humanoid = character:WaitForChild("Humanoid")
-		local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-		local entityModel = workspace:FindFirstChild("A60")
-		local primaryPart = entityModel and entityModel:FindFirstChild("RushNew")
-		if not primaryPart then return end
+    local entityModel = workspace:FindFirstChild("A60")
+    local primaryPart = entityModel and entityModel:FindFirstChild("RushNew")
+    if not primaryPart then return end
 
-		-- 🔇 Tắt tất cả âm thanh trong game tạm thời
-		local allSounds = {}
-		for _, obj in pairs(game:GetDescendants()) do
-			if obj:IsA("Sound") and obj.IsPlaying then
-				obj:Stop()
-				table.insert(allSounds, obj)
-			end
-		end
+    -- 🔇 Tắt tất cả âm thanh tạm thời
+    local allSounds = {}
+    for _, obj in ipairs(game:GetDescendants()) do
+        if obj:IsA("Sound") and obj.IsPlaying then
+            obj:Stop()
+            table.insert(allSounds, obj)
+        end
+    end
 
-		-- Phát âm thanh jumpscare
-        local sound = Instance.new("Sound", workspace)
-		sound.SoundId = "rbxassetid://103879029437685"
-		sound.Volume = 10
-		sound:Play()
+    -- Âm thanh jumpscare
+    local sound = Instance.new("Sound", workspace)
+    sound.SoundId = "rbxassetid://103879029437685"
+    sound.Volume = 10
+    sound:Play()
 
-		-- Di chuyển entity đến gần người chơi
-		primaryPart.Anchored = true
-		entityModel.PrimaryPart = primaryPart
-		local targetPos = humanoidRootPart.Position + humanoidRootPart.CFrame.LookVector * 10
-		local moveTween = TweenService:Create(primaryPart, TweenInfo.new(0.2), {
-			CFrame = CFrame.new(targetPos, camera.CFrame.Position)
-		})
-		moveTween:Play()
-		moveTween.Completed:Wait()
+    -- A-60 đến sát người chơi
+    primaryPart.Anchored = true
+    entityModel.PrimaryPart = primaryPart
 
-		-- Khóa điều khiển người chơi
-		humanoid.WalkSpeed = 0
-		humanoid.PlatformStand = true
+    local targetPos = humanoidRootPart.Position + humanoidRootPart.CFrame.LookVector * 10
+    local moveTween = TweenService:Create(primaryPart, TweenInfo.new(0.2), {
+        CFrame = CFrame.new(targetPos, camera.CFrame.Position)
+    })
+    moveTween:Play()
+    moveTween.Completed:Wait()
 
-		-- Camera jumpscare
-		local camConn
-		camConn = RunService.RenderStepped:Connect(function()
-			if character:GetAttribute("Hiding") then
-				-- Khi trốn: dừng jumpscare, phát lại toàn bộ âm thanh
-				if camConn then camConn:Disconnect() end
-				camera.CameraType = Enum.CameraType.Custom
+    -----------------------------------
+    -- 🚫 KHÓA DI CHUYỂN NGƯỜI CHƠI
+    -----------------------------------
+    humanoid.WalkSpeed = 0
+    humanoid.JumpPower = 0
+    humanoid.PlatformStand = true
 
-				for _, s in pairs(allSounds) do
-					if s and s.Parent then
-						s:Play()
-					end
-				end
 
-				entityModel:Destroy()
-			else
-				local desiredPos = camera.CFrame.Position + camera.CFrame.LookVector * 4 + Vector3.new(0, 0, 0)
-				primaryPart.CFrame = CFrame.new(desiredPos, camera.CFrame.Position)
-				camera.CFrame = CFrame.lookAt(camera.CFrame.Position, primaryPart.Position)
-			end
-		end)
+    -----------------------------------
+    -- 📌 CAMERA BÁM THEO (NHƯ CŨ)
+    -----------------------------------
+    local camConn
+    camConn = RunService.RenderStepped:Connect(function()
+        -- Nếu người chơi trốn, hủy jumpscare
+        if character:GetAttribute("Hiding") then
+            if camConn then camConn:Disconnect() end
+            camera.CameraType = Enum.CameraType.Custom
 
-		-- Gây damage trong 1 giây
-		local damageDuration = 2.5
-		local startTime = tick()
-		while tick() - startTime < damageDuration and humanoid.Health > 0 do
-			if character:GetAttribute("Hiding") then break end
-			humanoid.Health -= 4
-			task.wait(0.04)
-		end
+            for _, s in ipairs(allSounds) do
+                if s and s.Parent then s:Play() end
+            end
 
-		-- Nếu chưa kịp trốn, vẫn cleanup camera
-		if camConn then camConn:Disconnect() end
-		camera.CameraType = Enum.CameraType.Custom
+            primaryPart.Anchored = false
+            return
+        end
 
-		-- Phát lại âm thanh nếu chưa trốn kịp
-		for _, s in pairs(allSounds) do
-			if s and s.Parent then
-				s:Play()
-			end
-		end
+        -- Bám theo camera
+        local desiredPos = camera.CFrame.Position + camera.CFrame.LookVector * 4
+        primaryPart.CFrame = CFrame.new(desiredPos, camera.CFrame.Position)
+        camera.CFrame = CFrame.lookAt(camera.CFrame.Position, primaryPart.Position)
+    end)
+
+
+    --------------------------------------------------------------------
+    -- 😱 HIỆU ỨNG JUMPSCARE SAU 1 GIÂY (DISPLAY HÌNH ẢNH + TWEEN)
+    --------------------------------------------------------------------
+    task.wait(0.88)
+
+    -- GUI cho jumpscare
+    local gui = Instance.new("ScreenGui", player.PlayerGui)
+    gui.IgnoreGuiInset = true
+    gui.ResetOnSpawn = false
+
+    local img = Instance.new("ImageLabel", gui)
+    img.Image = "rbxassetid://16020415559"
+    img.BackgroundTransparency = 1
+    img.Size = UDim2.fromScale(0.8, 0.8)          -- nhỏ lúc đầu
+    img.Position = UDim2.fromScale(0.1, 0.1)
+    img.Rotation = 0
+    img.ImageTransparency = 1                     -- bắt đầu ẩn
+
+    -- Tween hiển thị + xoay + phóng to
+    local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(img, tweenInfo, {
+        ImageTransparency = 0,                    -- hiện lên
+        Rotation = 20,                             -- xoay nhẹ sang phải
+        Size = UDim2.fromScale(0.95, 0.95)         -- phóng to chút
+    })
+
+    tween:Play()
+    tween.Completed:Wait()
+
+    -- Sau tween, bạn có thể thêm hiệu ứng khác nếu muốn
+entityModel:Destroy()
+game.Players.LocalPlayer.Character.Humanoid.Health -= 1000
+game.ReplicatedStorage.GameStats["Player_".. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "Multi Monster"
+wait(2)
+gui:Destroy()
 	end)
 end)
 
