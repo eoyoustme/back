@@ -85,40 +85,37 @@ camShake:Shake(CameraShaker.Presets.Earthquake)
 
 -- ================== ON SPAWN ==================
 entity:SetCallback("OnSpawned", function()
-    local part = workspace:WaitForChild("A60")
-    local object = part:WaitForChild("RushNew")
-    local attachment = object:WaitForChild("Main")
+   local part = workspace:WaitForChild("A-60")
+local object = part:WaitForChild("RushNew")
+local attachment = object:WaitForChild("Main")
 
-    -- Tìm ParticleEmitter
-    local emitter = attachment:FindFirstChildWhichIsA("ParticleEmitter")
+local emitter = attachment:FindFirstChildWhichIsA("ParticleEmitter")
 
-    object.CanCollide = false
+object.CanCollide = false
 
-    if not emitter then
-        warn("Không tìm thấy ParticleEmitter trong Attachment Main")
-        return
-    end
+local running = true
 
-    local running = true
-    task.spawn(function()
-        while running and emitter and emitter:IsDescendantOf(workspace) do
-            local textures = {
-                "rbxassetid://12145599275",
-                "rbxassetid://12145534911",
-                "rbxassetid://12145554242",
-                "rbxassetid://12145599498",
-                "rbxassetid://12155335619",
-                "rbxassetid://12145534911",
-                "rbxassetid://12145599498",
-                "rbxassetid://12145598814"
-            }
+spawn(function()
+	while running and emitter and emitter:IsDescendantOf(workspace) do
+		
+		local textures = {
+			"rbxassetid://12145599275",
+			"rbxassetid://12145534911",
+			"rbxassetid://12145554242",
+			"rbxassetid://12145599498",
+			"rbxassetid://12155335619",
+			"rbxassetid://12145534911",
+			"rbxassetid://12145599498",
+			"rbxassetid://12145598814"
+		}
 
-            for _, tex in ipairs(textures) do
-                emitter.Texture = tex
-                task.wait()
-            end
-        end
-    end)
+		for _, tex in ipairs(textures) do
+			emitter.Texture = tex
+			task.wait()
+		end
+
+	end
+end)
 end)
 
 	entity:SetCallback("OnDespawning", function()
