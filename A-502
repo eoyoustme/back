@@ -230,7 +230,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
     --------------------------------------------------------------------
     -- 😱 HIỆU ỨNG JUMPSCARE SAU 1 GIÂY (DISPLAY HÌNH ẢNH + TWEEN)
     --------------------------------------------------------------------
-    task.wait(1)
+    task.wait(0.78)
 
     -- GUI cho jumpscare
     local gui = Instance.new("ScreenGui", player.PlayerGui)
@@ -260,6 +260,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 entityModel:Destroy()
 game.Players.LocalPlayer.Character.Humanoid.Health -= 1000
 game.ReplicatedStorage.GameStats["Player_".. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "Multi Monster"
+gui:Destroy()
 end)
 
 end)
