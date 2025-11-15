@@ -62,51 +62,17 @@ local entity = spawner.Create({
 
 entity:SetCallback("OnSpawned", function()
     print("Entity has spawned")
-local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
+local Tweeninfo = TweenInfo.new(5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local color = {Color = Color3.new(1, 0, 0)}
 
--- T?o ho?c tìm MainColorCorrection
-local colorCorrection = Lighting:FindFirstChild("MainColorCorrection")
-if not colorCorrection then
-    colorCorrection = Instance.new("ColorCorrectionEffect")
-    colorCorrection.Name = "MainColorCorrection"
-    colorCorrection.Parent = Lighting
-end
-
--- Thi?t l?p ban d?u
-colorCorrection.TintColor = Color3.fromRGB(255, 255, 255)
-colorCorrection.Contrast = 0.1
-
--- Tween gi?m contrast xu?ng 0 trong 2.5 giây
-TweenService:Create(colorCorrection, TweenInfo.new(2.5), {Contrast = 0}):Play()
-
--- Chuy?n sang màu d? trong 5 giây
-local redTween = TweenService:Create(colorCorrection, TweenInfo.new(5), {TintColor = Color3.fromRGB(250, 0, 0)})
-redTween:Play()
-
--- Ch? tween màu d? hoàn t?t
-task.wait(0.5)
-
--- Danh sách các màu d? d?i
-local colors = {
-    Color3.fromRGB(255, 0, 0),   -- Vàng
-    Color3.fromRGB(255 , 0, 0),     -- Xanh duong
-    Color3.fromRGB(255, 0, 0),     -- Xanh lá
-    Color3.fromRGB(255, 0, 0)  -- H?ng
-}
-
--- L?p 4 l?n d?i màu
-for _ = 1, 2 do
-    for _, color in ipairs(colors) do
-        local tween = TweenService:Create(colorCorrection, TweenInfo.new(0.7), {TintColor = color})
-        tween:Play()
-        task.wait(0.5)
+for _, v in pairs(workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:GetDescendants()) do
+    if v:IsA("Light") then
+        TweenService:Create(v, Tweeninfo, color):Play()
+    elseif v.Parent.Name == "LightFixture" then
+        TweenService:Create(v.Parent, Tweeninfo, color):Play()
     end
 end
-
--- Sau khi hoàn t?t, chuy?n l?i v? màu d?
-local finalRed = TweenService:Create(colorCorrection, TweenInfo.new(1), {TintColor = Color3.fromRGB(250, 0, 0)})
-finalRed:Play()
 end)
 
 entity:SetCallback("OnStartMoving", function()
