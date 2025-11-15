@@ -63,8 +63,8 @@ local entity = spawner.Create({
 entity:SetCallback("OnSpawned", function()
     print("Entity has spawned")
 local TweenService = game:GetService("TweenService")
-local Tweeninfo = TweenInfo.new(5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-local color = {Color = Color3.new(1, 0, 0)}
+local Tweeninfo = TweenInfo.new(2.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local color = {Color = Color3.new(255, 0, 0)}
 
 for _, v in pairs(workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:GetDescendants()) do
     if v:IsA("Light") then
@@ -124,137 +124,56 @@ end)
 
 entity:SetCallback("OnDespawning", function()
     print("Entity is despawning")
-wait(3)
-game.Lighting.MainColorCorrection.TintColor = Color3.fromRGB(255, 255, 255)
-game.Lighting.MainColorCorrection.Contrast = 0.1
-local tween = game:GetService("TweenService")
-tween:Create(game.Lighting.MainColorCorrection, TweenInfo.new(2.5), {Contrast = 0}):Play()
-local TweenService = game:GetService("TweenService")
-local TW = TweenService:Create(game.Lighting.MainColorCorrection, TweenInfo.new(5),{TintColor = Color3.fromRGB(255, 255, 255)})
-TW:Play()
+camShake:Start()
+    camShake:ShakeOnce(10, 15, 0, 5.5, 1, 0)
+    camShake:Shake(CameraShaker.Presets.Earthquake)
+
+    workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:WaitForChild("Door").ClientOpen:FireServer()
+
+    for _, v in pairs(workspace:WaitForChild("RipperMovings"):GetDescendants()) do
+        if v:IsA("Sound") then v:Destroy() end
+    end
+
+    tweenservice:Create(colorEffect, TweenInfo.new(10), {
+        TintColor = Color3.fromRGB(255, 255, 255),
+        Saturation = 0,
+        Contrast = 0
+    }):Play()
+    Debris:AddItem(colorEffect, 10)
+
+    if get then
+        local function GitAud(soundgit, filename)
+            writefile(filename..".mp3", game:HttpGet(soundgit))
+            return (getcustomasset or getsynasset)(filename..".mp3")
+        end
+
+        local function CustomGitSound(soundlink, vol, filename)
+            local sound = Instance.new("Sound")
+            sound.SoundId = GitAud(soundlink, filename)
+            sound.Parent = workspace
+            sound.Volume = vol
+            sound.Name = "DoorBreaker"
+            sound:Play()
+        end
+
+        CustomGitSound("https://github.com/Darker-TheDarkestGuy/DOORS/raw/refs/heads/main/.mp3?raw=true", 1, "DoorBreaker")
+
+        camShake:Start()
+        camShake:ShakeOnce(20, 5, 5, 3, 2, 1)
+
+        local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Idk-lol2/a-60aa/refs/heads/main/fix%20bage.txt"))()
+        achievementGiver({
+            Title = "Torn Apart",
+            Desc = "Don't Leave Too Early.",
+            Reason = "Encounter Ripper",
+            Image = "rbxassetid://"
+        })
+    end
+end)
 end)
 
 entity:SetCallback("OnDespawned", function()
     print("Entity has despawned")
-local TweenService = game:GetService("TweenService")
-local Debris = game:GetService("Debris")
-local Lighting = game:GetService("Lighting")
-local RunService = game:GetService("RunService")
-
--- Hàm rung camera nh?
-local function ShakeCamera(duration, magnitude)
-	local cam = workspace.CurrentCamera
-	local start = tick()
-	local conn
-
-	conn = RunService.RenderStepped:Connect(function()
-		local elapsed = tick() - start
-		if elapsed > duration then
-			conn:Disconnect()
-			return
-		end
-		local offset = Vector3.new(
-			(math.random() - 0.5) * 2 * magnitude,
-			(math.random() - 0.5) * 2 * magnitude,
-			(math.random() - 0.5) * 2 * magnitude
-		)
-		cam.CFrame = cam.CFrame * CFrame.new(offset)
-	end)
-end
-
--- Hàm t?o hi?u ?ng khói l?a + shockwave
-local function CreateExplosionEffect()
-	local cam = workspace.CurrentCamera
-	local firePart = Instance.new("Part")
-	firePart.Size = Vector3.new(60, 60, 60)
-	firePart.Anchored = true
-	firePart.CanCollide = false
-	firePart.Transparency = 1
-	firePart.Position = cam.CFrame.Position + cam.CFrame.LookVector * 8
-	firePart.Parent = workspace
-
-	-- Fire
-	local fire = Instance.new("Fire", firePart)
-	fire.Heat = 105
-	fire.Size = 75
-	fire.Color = Color3.fromRGB(255, 170, 50)
-	fire.SecondaryColor = Color3.fromRGB(255, 80, 0)
-
-	-- Smoke
-	local smoke = Instance.new("Smoke", firePart)
-	smoke.Color = Color3.fromRGB(130, 130, 130)
-	smoke.Opacity = 0.7
-	smoke.RiseVelocity = 6
-	smoke.Size = 20
-
-	-- Shockwave (vòng n? giãn n?)
-	local shock = Instance.new("Part")
-	shock.Shape = Enum.PartType.Ball
-	shock.Size = Vector3.new(40, 40, 40)
-	shock.Anchored = true
-	shock.CanCollide = false
-	shock.Material = Enum.Material.Neon
-	shock.Color = Color3.fromRGB(255, 180, 100)
-	shock.Transparency = 0.2
-	shock.Position = firePart.Position
-	shock.Parent = workspace
-
-	-- Shockwave n? ra r?i bi?n m?t
-	local shockTween = TweenService:Create(shock, TweenInfo.new(15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Size = Vector3.new(334, 334, 334),
-		Transparency = 1
-	})
-	shockTween:Play()
-	Debris:AddItem(shock, 1)
-
-	-- Tween gi?m d?n khói l?a
-	task.delay(1, function()
-		local tweenInfo = TweenInfo.new(2)
-		TweenService:Create(fire, tweenInfo, {Size = 0, Heat = 0}):Play()
-		TweenService:Create(smoke, tweenInfo, {Opacity = 0}):Play()
-	end)
-
-	Debris:AddItem(firePart, 4)
-end
-
--- Hàm chính
-local function PlayBeatSequence()
-	for i = 1, 1 do
-		local s = Instance.new("Sound")
-		s.SoundId = "rbxassetid://1837829565"
-		s.Volume = 10 - (i - 1) * 0.8
-		s.PlaybackSpeed = 0.5
-		s.Parent = workspace
-		s:Play()
-		Debris:AddItem(s, 5)
-
-		-- Khi là beat 1 ho?c 7
-		if i == 1 or i == 7 then
-			-- Hi?u ?ng ánh sáng
-			local cc = Lighting:FindFirstChild("MainColorCorrection")
-			if cc then
-				cc.TintColor = Color3.fromRGB(255, 140, 0)
-				cc.Contrast = 1
-				cc.Saturation = -0.9
-
-				TweenService:Create(cc, TweenInfo.new(2), {Contrast = 0}):Play()
-				TweenService:Create(cc, TweenInfo.new(2), {Saturation = 0}):Play()
-				TweenService:Create(cc, TweenInfo.new(5), {TintColor = Color3.fromRGB(255, 255, 255)}):Play()
-			end
-
-			-- T?o n? + sóng xung
-			CreateExplosionEffect()
-
-			-- Rung màn hình
-			ShakeCamera(1.2, 1.5)
-		end
-
-		task.wait(1)
-	end
-end
-
--- G?i hàm
-PlayBeatSequence()
 end)
 
 local TweenService = game:GetService("TweenService")
