@@ -415,7 +415,7 @@ local flashDuration = 1.4
 -- 1) FADE-IN (1 lần duy nhất, 1 → 0)
 ----------------------------------------------------
 imageLabel.Image = jumpscareImage1 -- hình xuất hiện đầu tiên
-local tweenIn = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
+local tweenIn = TweenInfo.new(1, Enum.EasingStyle.Linear)
 TweenService:Create(imageLabel, tweenIn, {ImageTransparency = 0}):Play()
 
 ----------------------------------------------------
