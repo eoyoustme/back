@@ -435,7 +435,7 @@ end
 ----------------------------------------------------
 imageLabel.ImageTransparency = 1
 
-			task.wait(1.4)
+			task.wait(0)
          firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {"You died to who you call Ripper","he will get faster every he go a room","Hide in a closet if he spawn."},"Blue")
 
 			to = false
