@@ -16,7 +16,7 @@ local camera = Workspace.CurrentCamera
 local entity = spawner.Create({
 	Entity = {
 		Name = "A60",
-		Asset = "rbxassetid://70800049492343",
+		Asset = "rbxassetid://76497785947021",
 		HeightOffset = 0
 	},
 	Lights = {
@@ -246,7 +246,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
     img.ImageTransparency = 1                     -- bắt đầu ẩn
 
     -- Tween hiển thị + xoay + phóng to
-    local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
     local tween = TweenService:Create(img, tweenInfo, {
         ImageTransparency = 0,                    -- hiện lên
         Rotation = 20,                             -- xoay nhẹ sang phải
@@ -259,7 +259,8 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
     -- Sau tween, bạn có thể thêm hiệu ứng khác nếu muốn
 entityModel:Destroy()
 game.Players.LocalPlayer.Character.Humanoid.Health -= 1000
-game.ReplicatedStorage.GameStats["Player_".. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "Multi Monster"
+game.ReplicatedStorage.GameStats["Player_".. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "A-60"
+ firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {"You died to who you call A-60","he is a demon","Hide in a closet if he spawn."},"Blue")
 wait(2)
 gui:Destroy()
 end)
