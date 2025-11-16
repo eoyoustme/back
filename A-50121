@@ -1,0 +1,266 @@
+-- Import spawner
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local camera = Workspace.CurrentCamera
+
+-- =====================================
+-- ============ ENTITY SETUP ===========
+-- =====================================
+
+local entity = spawner.Create({
+	Entity = {
+		Name = "A60",
+		Asset = "rbxassetid://76497785947021", -- phải là model
+		HeightOffset = 0
+	},
+	Lights = {
+		Flicker = {Enabled = false, Duration = 1},
+		Shatter = true,
+		Repair = false
+	},
+	Earthquake = {Enabled = true},
+	CameraShake = {
+		Enabled = true,
+		Range = 100,
+		Values = {20, 30, 0.1, 0.1}
+	},
+	Movement = {
+		Speed = 200,
+		Delay = 6.19,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = true,
+		Type = "Ambush",
+		Min = 8,
+		Max = 8,
+		Delay = 0.5
+	},
+	Damage = {
+		Enabled = true,
+		Range = 100,
+		Amount = 0.01
+	},
+	Crucifixion = {
+		Enabled = true,
+		Range = math.huge,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding",
+		Hints = {"Death","Hints","Go","Here"},
+		Cause = ""
+	}
+})
+
+
+-- =====================================
+-- =========== ON SPAWNED ==============
+-- =====================================
+
+local running = false
+
+entity:SetCallback("OnSpawned", function()
+	running = true
+
+	local part = workspace:WaitForChild("A60", 5)
+	if not part then
+		warn("⚠ Không tìm thấy model A60 trong workspace.")
+		return
+	end
+
+	-- Các trường hợp người dùng không có đúng RushNew → không crash
+	local object = part:FindFirstChild("RushNew")
+	if not object then
+		warn("⚠ Không tìm thấy RushNew (bỏ qua effect nhưng vẫn chạy entity).")
+		return
+	end
+
+	local attachment = object:FindFirstChild("Main")
+	if not attachment then
+		warn("⚠ Không tìm thấy Main Attachment.")
+		return
+	end
+
+	local emitter = attachment:FindFirstChildOfClass("ParticleEmitter")
+	if not emitter then
+		warn("⚠ Không tìm thấy ParticleEmitter.")
+		return
+	end
+
+	object.CanCollide = false
+
+	-- Texture animation (giữ nguyên như bạn viết)
+	task.spawn(function()
+		local textures = {
+			"rbxassetid://12145534911",
+			"rbxassetid://12145554242",
+			"rbxassetid://12145599498",
+			"rbxassetid://12145599275",
+			"rbxassetid://12155335619",
+			"rbxassetid://12145598814",
+			"rbxassetid://12146135062",
+			"rbxassetid://11378285585"
+		}
+
+		while running and emitter:IsDescendantOf(workspace) do
+			for _, t in ipairs(textures) do
+				if not running then break end
+				emitter.Texture = t
+				task.wait()
+			end
+		end
+	end)
+end)
+
+
+
+-- =====================================
+-- ========= ON DESPAWNING =============
+-- =====================================
+
+entity:SetCallback("OnDespawning", function()
+	running = false
+
+	local lighting = game.Lighting
+	local tints = {
+		{Color3.fromRGB(30,30,30), 2},
+		{Color3.fromRGB(60,60,60), 2},
+		{Color3.fromRGB(120,120,120), 5},
+		{Color3.fromRGB(255,255,255), 5}
+	}
+
+	for _, v in ipairs(tints) do
+		local tween = TweenService:Create(lighting.MainColorCorrection, TweenInfo.new(v[2]), {TintColor = v[1]})
+		tween:Play()
+		task.wait(v[2])
+	end
+end)
+
+
+
+-- =====================================
+-- ========= ON DAMAGE PLAYER ==========
+-- =====================================
+
+entity:SetCallback("OnDamagePlayer", function(newHealth)
+	if newHealth == 0 then return end
+
+	task.spawn(function()
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoid = character:WaitForChild("Humanoid")
+		local root = character:WaitForChild("HumanoidRootPart")
+
+		local entityModel = workspace:FindFirstChild("A60")
+		local primary = entityModel and entityModel:FindFirstChild("RushNew")
+
+		-- Giữ nguyên jumpscare của bạn
+		------------------------------------
+		-- Tắt tất cả âm thanh
+		------------------------------------
+		local allSounds = {}
+		for _, obj in ipairs(game:GetDescendants()) do
+			if obj:IsA("Sound") and obj.IsPlaying then
+				obj:Stop()
+				table.insert(allSounds, obj)
+			end
+		end
+
+		-- Âm jumpscare
+		local scareSound = Instance.new("Sound", workspace)
+		scareSound.SoundId = "rbxassetid://103879029437685"
+		scareSound.Volume = 10
+		scareSound:Play()
+
+		if primary then
+			primary.Anchored = true
+			entityModel.PrimaryPart = primary
+
+			local target = root.Position + root.CFrame.LookVector * 10
+			local tween = TweenService:Create(primary, TweenInfo.new(0.2), {
+				CFrame = CFrame.new(target, camera.CFrame.Position)
+			})
+			tween:Play()
+			tween.Completed:Wait()
+		end
+
+
+		------------------------------------
+		-- Khoá người chơi
+		------------------------------------
+		humanoid.WalkSpeed = 0
+		humanoid.JumpPower = 0
+		humanoid.PlatformStand = true
+
+
+		------------------------------------
+		-- Camera follow (giữ nguyên)
+		------------------------------------
+		local camConn
+		camConn = RunService.RenderStepped:Connect(function()
+			if character:GetAttribute("Hiding") then
+				if camConn then camConn:Disconnect() end
+				camera.CameraType = Enum.CameraType.Custom
+				for _, s in ipairs(allSounds) do if s.Parent then s:Play() end end
+				if primary then primary.Anchored = false end
+				return
+			end
+
+			if primary then
+				local pos = camera.CFrame.Position + camera.CFrame.LookVector * 4
+				primary.CFrame = CFrame.new(pos, camera.CFrame.Position)
+			end
+
+			if primary then
+				camera.CFrame = CFrame.lookAt(camera.CFrame.Position, primary.Position)
+			end
+		end)
+
+
+		------------------------------------
+		-- GIỮ NGUYÊN JUMPSCARE ẢNH + TWEEN
+		------------------------------------
+		task.wait(0.78)
+
+		local gui = Instance.new("ScreenGui", player.PlayerGui)
+		gui.IgnoreGuiInset = true
+		gui.ResetOnSpawn = false
+
+		local img = Instance.new("ImageLabel", gui)
+		img.Image = "rbxassetid://12145599275"
+		img.BackgroundTransparency = 1
+		img.Size = UDim2.fromScale(0.8, 0.8)
+		img.Position = UDim2.fromScale(0.1, 0.1)
+		img.Rotation = 0
+		img.ImageTransparency = 1
+
+		local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+		local tween = TweenService:Create(img, tweenInfo, {
+			ImageTransparency = 0,
+			Rotation = 20,
+			Size = UDim2.fromScale(0.95, 0.95)
+		})
+
+		tween:Play()
+		tween.Completed:Wait()
+
+		if entityModel then entityModel:Destroy() end
+		humanoid.Health = 0
+		wait(2)
+		gui:Destroy()
+	end)
+end)
+
+
+---------------------------------------------------------------
+-- CHẠY ENTITY
+---------------------------------------------------------------
+
+entity:Run()
