@@ -9,7 +9,7 @@ local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/Regul
 local entity = spawner.Create({
 	Entity = {
 		Name = "Ripper",
-		Asset = "rbxassetid://135521310747261",
+		Asset = "rbxassetid://76656463493976",
 		HeightOffset = 2
 	},
 	Lights = {
@@ -157,7 +157,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 			local camera = workspace.CurrentCamera
 
 			local entityModel = workspace:WaitForChild("Ripper")
-			local primaryPart = entityModel:FindFirstChild("Ripe")
+			local primaryPart = entityModel:FindFirstChild("RushNew")
 
 			if not (entityModel and humanoid and humanoidRootPart and primaryPart and camera) then return end
 
