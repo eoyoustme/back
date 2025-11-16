@@ -1,0 +1,162 @@
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+-- Load Spawner
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+
+-- Create Entity
+local entity = spawner.Create({
+	Entity = {
+		Name = "Ripper",
+		Asset = "rbxassetid://118750853123155",
+		HeightOffset = 1
+	},
+	Lights = {
+		Flicker = {Enabled = false, Duration = 1},
+		Shatter = false,
+		Repair = false
+	},
+	Earthquake = {Enabled = true},
+	CameraShake = {
+		Enabled = true,
+		Range = 100,
+		Values = {10.5, 40, 0.1, 1}
+	},
+	Movement = {
+		Speed = 125,
+		Delay = 5.771,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = false,
+		Type = "Ambush",
+		Min = 2,
+		Max = 2,
+		Delay = 0.2
+	},
+	Damage = {
+		Enabled = true,
+		Range = 40,
+		Amount = 125
+	},
+	Crucifixion = {
+		Enabled = true,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding",
+		Hints = {"Death","Hints","Go","Here"},
+		Cause = ""
+	}
+})
+
+---------------------------------------------------------------------
+-- 📌 ON SPAWNED
+---------------------------------------------------------------------
+entity:SetCallback("OnSpawned", function()
+    print("Entity has spawned")
+
+	local TweenService = game:GetService("TweenService")
+	local room = workspace.CurrentRooms:FindFirstChild(game.ReplicatedStorage.GameData.LatestRoom.Value)
+	if not room then return end
+
+	local tweenInfo = TweenInfo.new(2.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+	local colorGoal = {Color = Color3.fromRGB(255, 0, 0)}
+
+	for _, v in ipairs(room:GetDescendants()) do
+		if v:IsA("Light") then
+			TweenService:Create(v, tweenInfo, colorGoal):Play()
+		elseif v.Name == "LightFixture" and v:FindFirstChild("Light") then
+			TweenService:Create(v.Light, tweenInfo, colorGoal):Play()
+		end
+	end
+end)
+
+---------------------------------------------------------------------
+-- 📌 ON START MOVING
+---------------------------------------------------------------------
+entity:SetCallback("OnStartMoving", function()
+	print("Entity has started moving")
+end)
+
+---------------------------------------------------------------------
+-- 📌 ON ENTER ROOM
+---------------------------------------------------------------------
+entity:SetCallback("OnEnterRoom", function(room, firstTime)
+	if firstTime then
+		entity.Config.Movement.Speed *= 1.2
+		print("Entity entered "..room.Name.." (first time). New Speed:", entity.Config.Movement.Speed)
+	else
+		print("Entity entered "..room.Name.." again.")
+	end
+end)
+
+---------------------------------------------------------------------
+-- 📌 ON LOOK AT
+---------------------------------------------------------------------
+entity:SetCallback("OnLookAt", function(visible)
+	if visible then
+		print("Player is looking at entity")
+	else
+		print("Player's view is obstructed")
+	end
+end)
+
+---------------------------------------------------------------------
+-- 📌 ON REBOUNDING
+---------------------------------------------------------------------
+entity:SetCallback("OnRebounding", function(start)
+	if start then
+		print("Entity started rebounding")
+
+		local L = game.Lighting.MainColorCorrection
+		L.TintColor = Color3.fromRGB(255, 255, 255)
+		L.Contrast = 1
+		L.Saturation = -0.9
+
+		local TweenService = game:GetService("TweenService")
+		TweenService:Create(L, TweenInfo.new(2), {Contrast = 0}):Play()
+		TweenService:Create(L, TweenInfo.new(2), {Saturation = 0}):Play()
+		TweenService:Create(L, TweenInfo.new(5), {TintColor = Color3.fromRGB(255,255,255)}):Play()
+	else
+		print("Entity finished rebounding")
+	end
+end)
+
+---------------------------------------------------------------------
+-- 📌 ON DESPAWNING
+---------------------------------------------------------------------
+entity:SetCallback("OnDespawning", function()
+	print("Entity is despawning")
+end)
+
+---------------------------------------------------------------------
+-- 📌 ON DESPAWNED (Achievement)
+---------------------------------------------------------------------
+entity:SetCallback("OnDespawned", function()
+	print("Entity has despawned")
+	local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Idk-lol2/a-60aa/refs/heads/main/fix%20bage.txt"))()
+	achievementGiver({
+		Title = "Torn Apart",
+		Desc = "Don't Leave Too Early.",
+		Reason = "Encounter Ripper",
+		Image = "rbxassetid://125217047990746"
+	})
+end)
+
+---------------------------------------------------------------------
+-- 📌 ON DAMAGE PLAYER **(ĐÃ SỬA LỖI end)**
+---------------------------------------------------------------------
+entity:SetCallback("OnDamagePlayer", function(newHealth)
+	if newHealth == 0 then
+		print("Entity has killed the player")
+	else
+		print("Entity has damaged the player")
+	end
+end)
+
+---------------------------------------------------------------------
+-- RUN ENTITY
+---------------------------------------------------------------------
+entity:Run()
