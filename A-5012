@@ -260,7 +260,6 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 entityModel:Destroy()
 game.Players.LocalPlayer.Character.Humanoid.Health -= 1000
 game.ReplicatedStorage.GameStats["Player_".. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "A-60"
- firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent, {"You died to who you call A-60","he is a demon","Hide in a closet if he spawn."},"Blue")
 wait(2)
 gui:Destroy()
 end)
