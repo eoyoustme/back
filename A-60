@@ -1,3 +1,27 @@
+local lighting = game.Lighting
+lighting.MainColorCorrection.TintColor = Color3.fromRGB(255, 0, 0)
+lighting.MainColorCorrection.Contrast = 0.2
+TweenService:Create(lighting.MainColorCorrection, TweenInfo.new(2.5), {Contrast = 0}):Play()
+TweenService:Create(lighting.MainColorCorrection, TweenInfo.new(5), {TintColor = Color3.fromRGB(255, 255, 255)}):Play()
+
+-- Camera Shake
+local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+local camara = game.Workspace.CurrentCamera
+local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+ camara.CFrame = camara.CFrame * shakeCf
+end)
+camShake:Start()
+camShake:ShakeOnce(20,35,0,4,2,12)
+local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+local camara = game.Workspace.CurrentCamera
+
+local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(cf)
+	camara.CFrame = camara.CFrame * cf
+end)
+
+camShake:Start()
+camShake:Shake(CameraShaker.Presets.Earthquake)
+
 -- Import spawner
 local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
 local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
@@ -16,7 +40,7 @@ local camera = Workspace.CurrentCamera
 local entity = spawner.Create({
 	Entity = {
 		Name = "A60",
-		Asset = "rbxassetid://76497785947021", -- phải là model
+		Asset = "rbxassetid://86680669339641", -- phải là model
 		HeightOffset = 0
 	},
 	Lights = {
