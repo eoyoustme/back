@@ -175,7 +175,8 @@ if ripeAttachment then
     if emitter and emitter:IsA("ParticleEmitter") then
         emitter.Texture = "rbxassetid://16025871152" -- texture mới
         emitter.Enabled = true
-        emitter.TimeScale = 1
+        emitter.Size = 8
+        emitter.TimeScale = 0
     end
 end
 
