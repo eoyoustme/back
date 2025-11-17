@@ -169,7 +169,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
     -- 🔥 PHẦN BẠN YÊU CẦU: TÌM ATTACHMENT "Ripe" → PARTICLE "2" → ĐỔI TEXTURE
     --------------------------------------------------------------------
     -- Đảm bảo entityModel đã tồn tại
-local ripeAttachment = entityModel:FindFirstChild("Ripe", true)
+local ripeAttachment = primaryPart:FindFirstChild("Ripe", true)
 if ripeAttachment then
     local emitter = ripeAttachment:FindFirstChild("2")
     if emitter and emitter:IsA("ParticleEmitter") then
