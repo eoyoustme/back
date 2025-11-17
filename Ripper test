@@ -200,7 +200,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
         end)
 
         -- Tính toán vị trí dừng lại 4 stud trước người chơi
-        local targetPosition = humanoidRootPart.Position - humanoidRootPart.CFrame.LookVector * -10
+        local targetPosition = humanoidRootPart.Position - humanoidRootPart.CFrame.LookVector * -6
 
         -- Di chuyển entity tới vị trí đó trong 2 giây
         local moveTweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Linear)
@@ -278,7 +278,7 @@ local function GetGitSound(GithubSnd, SoundName)
 end
 local Jumpscare = GetGitSound("https://github.com/eoyoustme/back/raw/main/Kill_with_static.mp3","Kill")
 Jumpscare.Parent = workspace
-Jumpscare.Volume = 3
+Jumpscare.Volume = 1
 Jumpscare.PlaybackSpeed = 1
 Jumpscare:Play()
 
@@ -315,7 +315,7 @@ local flashDuration = 1.4
 -- 1) FADE-IN (1 lần duy nhất, 1 → 0)
 ----------------------------------------------------
 imageLabel.Image = jumpscareImage1 -- hình xuất hiện đầu tiên
-local tweenIn = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
+local tweenIn = TweenInfo.new(1, Enum.EasingStyle.Linear)
 TweenService:Create(imageLabel, tweenIn, {ImageTransparency = 0}):Play()
 
 ----------------------------------------------------
