@@ -1,0 +1,282 @@
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+--====== LOAD SPAWNER ======--
+
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+
+--====== CREATE ENTITY ======--
+
+local entity = spawner.Create({
+	Entity = {
+		Name = "Ripper",
+		Asset = "rbxassetid://130339930471583",
+		HeightOffset = 1
+	},
+	Lights = {
+		Flicker = {
+			Enabled = false,
+			Duration = 1
+		},
+		Shatter = false,
+		Repair = false
+	},
+	Earthquake = {
+		Enabled = true
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 100,
+		Values = {10.5, 40, 0.1, 1}
+	},
+	Movement = {
+		Speed = 125,
+		Delay = 5.771,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = false,
+		Type = "Ambush",
+		Min = 2,
+		Max = 2,
+		Delay = 0.2
+	},
+	Damage = {
+		Enabled = true,
+		Range = 40,
+		Amount = 0.01
+	},
+	Crucifixion = {
+		Enabled = true,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding",
+		Hints = {"Death", "Hints", "Go", "Here"},
+		Cause = ""
+	}
+})
+
+--====== DEBUG ======--
+
+entity:SetCallback("OnSpawned", function()
+	print("Entity has spawned")
+	local TweenService = game:GetService("TweenService")
+	local Tweeninfo = TweenInfo.new(2.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+	local color = {Color = Color3.new(255, 0, 0)}
+
+	for _, v in pairs(workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:GetDescendants()) do
+		if v:IsA("Light") then
+			TweenService:Create(v, Tweeninfo, color):Play()
+		elseif v.Parent.Name == "LightFixture" then
+			TweenService:Create(v.Parent, Tweeninfo, color):Play()
+		end
+	end
+end)
+
+entity:SetCallback("OnStartMoving", function()
+	print("Entity has started moving")
+end)
+
+entity:SetCallback("OnEnterRoom", function(room, firstTime)
+	if firstTime then
+		print("Entity entered room:", room.Name)
+		entity.Config.Movement.Speed = entity.Config.Movement.Speed * 1.2
+	else
+		print("Entity returned to room:", room.Name)
+	end
+end)
+
+entity:SetCallback("OnLookAt", function(lineOfSight)
+	print(lineOfSight and "Player looking at entity" or "View obstructed")
+end)
+
+entity:SetCallback("OnRebounding", function(start)
+	print(start and "Entity rebound start" or "Entity rebound end")
+end)
+
+entity:SetCallback("OnDespawned", function()
+	print("Entity despawned")
+	local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Idk-lol2/a-60aa/refs/heads/main/fix%20bage.txt"))()
+	achievementGiver({
+		Title = "Torn Apart",
+		Desc = "Don't Leave Too Early.",
+		Reason = "Encounter Ripper",
+		Image = "rbxassetid://125217047990746"
+	})
+end)
+
+--====== JUMPSCARE CALLBACK ======--
+
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+
+entity:SetCallback("OnDamagePlayer", function(newHealth)
+	if newHealth == 0 then
+		print("Entity killed player")
+		return
+	end
+
+	--------------------------------------------------------------------
+	--                           JUMPSCARE
+	--------------------------------------------------------------------
+	task.spawn(function()
+		local player = Players.LocalPlayer
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoid = character:WaitForChild("Humanoid")
+		local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+		local camera = workspace.CurrentCamera
+
+		----------------------------------------------------------------
+		-- LẤY ENTITY MODEL ĐÚNG (V2 SPAWNER)
+		----------------------------------------------------------------
+		local latestRoom = tostring(game.ReplicatedStorage.GameData.LatestRoom.Value)
+		local room = workspace.CurrentRooms:FindFirstChild(latestRoom)
+
+		if not room then return end
+
+		local entityModel = room:FindFirstChild("Ripper") or room:WaitForChild("Ripper", 3)
+		if not entityModel then return end
+
+		local primaryPart = entityModel:FindFirstChild("Ripe")
+		if not primaryPart then return end
+
+		----------------------------------------------------------------
+		-- LOCK PLAYER
+		----------------------------------------------------------------
+		local originalWalk = humanoid.WalkSpeed
+		local originalJump = humanoid.JumpPower
+		humanoid.WalkSpeed = 0
+		humanoid.JumpPower = 0
+
+		local controls = require(player.PlayerScripts.PlayerModule):GetControls()
+		controls:Disable()
+
+		local to = true
+
+		task.spawn(function()
+			while to and primaryPart.Parent and humanoidRootPart.Parent do
+				local tween = TweenService:Create(primaryPart, TweenInfo.new(99999), {
+					CFrame = humanoidRootPart.CFrame
+				})
+				tween:Play()
+				tween.Completed:Wait()
+			end
+		end)
+
+		wait(.35)
+
+		----------------------------------------------------------------
+		-- TẮT PARTICLES
+		----------------------------------------------------------------
+		for _, d in ipairs(entityModel:GetDescendants()) do
+			if d:IsA("ParticleEmitter") then
+				d.TimeScale = 0
+			end
+		end
+
+		----------------------------------------------------------------
+		-- ĐỔI PARTICLE "2" TRONG ATTACHMENT "Ripe"
+		----------------------------------------------------------------
+		task.spawn(function()
+			local att = entityModel:FindFirstChild("Ripe", true)
+			if att then
+				local emitter = att:FindFirstChild("2")
+				if emitter then
+					emitter.Texture = "rbxassetid://16025871152"
+					emitter.Enabled = true
+					emitter.TimeScale = 1
+				end
+			end
+		end)
+
+		----------------------------------------------------------------
+		-- CAMERA LOCK
+		----------------------------------------------------------------
+		camera.CameraType = Enum.CameraType.Scriptable
+
+		local camCon
+		camCon = RunService.RenderStepped:Connect(function()
+			if not primaryPart.Parent then camCon:Disconnect() return end
+			camera.CFrame = CFrame.lookAt(camera.CFrame.Position, primaryPart.Position)
+		end)
+
+		----------------------------------------------------------------
+		-- ÂM THANH
+		----------------------------------------------------------------
+		local function GetGitSound(url, name)
+			if not isfile(name..".mp3") then
+				writefile(name..".mp3", game:HttpGet(url))
+			end
+			local sound = Instance.new("Sound")
+			sound.SoundId = getcustomasset(name..".mp3")
+			return sound
+		end
+
+		local Jumpscare = GetGitSound("https://github.com/eoyoustme/back/raw/main/Kill_with_static.mp3","Kill")
+		Jumpscare.Parent = workspace
+		Jumpscare.Volume = 1
+		Jumpscare:Play()
+
+		local s = Instance.new("Sound", workspace)
+		s.SoundId = "rbxassetid://1837829565"
+		s.Volume = 3
+		s.PlaybackSpeed = .85
+		s:Play()
+
+		for _, d in ipairs(entityModel:GetDescendants()) do
+			if d:IsA("Sound") then
+				d.Playing = false
+				d.Volume = 0
+			end
+		end
+
+		wait(1)
+
+		----------------------------------------------------------------
+		-- UI FLASH
+		----------------------------------------------------------------
+		local gui = Instance.new("ScreenGui", player.PlayerGui)
+		gui.DisplayOrder = 99999
+		local img = Instance.new("ImageLabel", gui)
+		img.Size = UDim2.fromScale(1,1)
+		img.BackgroundTransparency = 1
+		img.Image = "rbxassetid://94547864377343"
+		img.ImageTransparency = 1
+
+		TweenService:Create(img, TweenInfo.new(1), {ImageTransparency = 0}):Play()
+
+		local t = tick()
+		while tick()-t < 1.4 do
+			img.Image = "rbxassetid://94547864377343"
+			task.wait()
+			img.Image = "rbxassetid://236542974"
+			task.wait()
+		end
+
+		img.ImageTransparency = 1
+
+		----------------------------------------------------------------
+		-- KẾT THÚC
+		----------------------------------------------------------------
+		firesignal(game.ReplicatedStorage.RemotesFolder.DeathHint.OnClientEvent,
+		{
+			"You died to who you call Ripper",
+			"He will get faster every room he goes.",
+			"Hide in a closet if he spawns."
+		}, "Blue")
+
+		to = false
+		humanoid.Health = 0
+
+		camera.CameraType = Enum.CameraType.Custom
+		gui:Destroy()
+	end)
+end)
+
+--====== RUN ENTITY ======--
+
+entity:Run()
