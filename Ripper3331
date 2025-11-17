@@ -191,11 +191,11 @@ wait(0.35)
             end
         end
 
-local ripeAttachment = primaryPart:FindFirstChild("RushNew", true)
+local ripeAttachment = primaryPart:FindFirstChild("Attachment", true)
 if ripeAttachment then
     local emitter = ripeAttachment:FindFirstChild("ParticleEmitter2")
     if emitter and emitter:IsA("ParticleEmitter") then
-        emitter.Texture = "rbxassetid://107322359913211" -- texture mới
+        emitter.Texture = "rbxassetid://83070783350540" -- texture mới
         emitter.Enabled = true
         emitter.TimeScale = 0
     end
