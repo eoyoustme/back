@@ -153,8 +153,6 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
         end
     end)
 
-    wait(0.65)
-
     -- Tắt toàn bộ particle trước jumpscare
     local function SetAllParticlesTimeScale(model, timescale)
         for _, descendant in ipairs(model:GetDescendants()) do
@@ -163,7 +161,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
             end
         end
     end
-    SetAllParticlesTimeScale(entityModel, 0)
+    SetAllParticlesTimeScale(entityModel, 1)
 
     --------------------------------------------------------------------
     -- 🔥 PHẦN BẠN YÊU CẦU: TÌM ATTACHMENT "Ripe" → PARTICLE "2" → ĐỔI TEXTURE
@@ -178,6 +176,9 @@ if ripeAttachment then
         emitter.TimeScale = 0
     end
 end
+
+wait(0.3)
+  SetAllParticlesTimeScale(entityModel, 0)
 
     --------------------------------------------------------------------
 
