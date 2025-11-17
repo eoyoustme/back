@@ -168,34 +168,17 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
     --------------------------------------------------------------------
     -- 🔥 PHẦN BẠN YÊU CẦU: TÌM ATTACHMENT "Ripe" → PARTICLE "2" → ĐỔI TEXTURE
     --------------------------------------------------------------------
-    task.spawn(function()
-        local ripeAttachment = nil
-        local emitter = nil
+    -- Đảm bảo entityModel đã tồn tại
+local ripeAttachment = entityModel:FindFirstChild("Ripe", true)
+if ripeAttachment then
+    local emitter = ripeAttachment:FindFirstChild("2")
+    if emitter and emitter:IsA("ParticleEmitter") then
+        emitter.Texture = "rbxassetid://16025871152" -- texture mới
+        emitter.Enabled = true
+        emitter.TimeScale = 1
+    end
+end
 
-        -- Tìm Attachment "Ripe"
-        for _, obj in ipairs(entityModel:GetDescendants()) do
-            if obj:IsA("Attachment") and obj.Name == "Ripe" then
-                ripeAttachment = obj
-                break
-            end
-        end
-
-        if ripeAttachment then
-            for _, obj in ipairs(ripeAttachment:GetChildren()) do
-                if obj:IsA("ParticleEmitter") and obj.Name == "2" then
-                    emitter = obj
-                    break
-                end
-            end
-        end
-
-        -- Đổi texture
-        if emitter then
-            emitter.Texture = "rbxassetid://16025871152"
-            emitter.Enabled = true
-            emitter.TimeScale = 1
-        end
-    end)
     --------------------------------------------------------------------
 
     camera.CameraType = Enum.CameraType.Scriptable
