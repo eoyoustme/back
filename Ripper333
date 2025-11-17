@@ -191,6 +191,17 @@ wait(0.35)
             end
         end
 
+local ripeAttachment = primaryPart:FindFirstChild("RushNew", true)
+if ripeAttachment then
+    local emitter = ripeAttachment:FindFirstChild("ParticleEmitter2")
+    if emitter and emitter:IsA("ParticleEmitter") then
+        emitter.Texture = "rbxassetid://107322359913211" -- texture mới
+        emitter.Enabled = true
+        emitter.TimeScale = 0
+    end
+end
+
+
         -- Tắt tất cả particle trên entity lúc jumpscare bắt đầu
         SetAllParticlesTimeScale(entityModel, 0)
 
@@ -219,6 +230,12 @@ local Jumpscare = GetGitSound("https://github.com/eoyoustme/back/raw/main/Kill_w
 Jumpscare.Parent = workspace
 Jumpscare.Volume = 1
 Jumpscare.PlaybackSpeed = 1
+
+ local sound = Instance.new("Sound", workspace)
+    sound.SoundId = "rbxassetid://1837829565"
+    sound.Volume = 3
+    sound.PlaybackSpeed = 0.85
+    sound:Play()
 
 -- 🔇 TẮT TẤT CẢ ÂM THANH TRONG ENTITY MODEL VÀ PART
 for _, descendant in ipairs(entityModel:GetDescendants()) do
