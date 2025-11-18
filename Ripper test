@@ -203,7 +203,7 @@ end
         local targetPosition = humanoidRootPart.Position - humanoidRootPart.CFrame.LookVector * -6
 
         -- Di chuyển entity tới vị trí đó trong 2 giây
-        local moveTweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Linear)
+        local moveTweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Linear)
         local moveTweenGoal = {CFrame = CFrame.new(targetPosition)}
         local moveTween = TweenService:Create(primaryPart, moveTweenInfo, moveTweenGoal)
         moveTween:Play()
