@@ -175,7 +175,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 			task.spawn(function()
 				while to and primaryPart.Parent and humanoidRootPart.Parent do
 					local targetCFrame = humanoidRootPart.CFrame
-					local tween = TweenService:Create(primaryPart, TweenInfo.new(20000000, Enum.EasingStyle.Quad), {CFrame = targetCFrame})
+					local tween = TweenService:Create(primaryPart, TweenInfo.new(2000000000000, Enum.EasingStyle.Quad), {CFrame = targetCFrame})
 					tween:Play()
 					tween.Completed:Wait()
 				end
@@ -233,7 +233,7 @@ Jumpscare.PlaybackSpeed = 1
 
  local sound = Instance.new("Sound", workspace)
     sound.SoundId = "rbxassetid://1837829565"
-    sound.Volume = 3
+    sound.Volume = 10
     sound.PlaybackSpeed = 0.85
     sound:Play()
 
