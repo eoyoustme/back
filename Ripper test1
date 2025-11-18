@@ -193,11 +193,8 @@ camera.CameraType = Enum.CameraType.Scriptable
 
 local camConnection = RunService.RenderStepped:Connect(function()
     if primaryPart and primaryPart.Parent then
-        camera.CFrame = CFrame.lookAt(
+        camera.CFrame = CFrame.lookAt
             camera.CFrame.Position,
-            camera.CFrame.Position + Vector3.new(0, 1.5, 0)
-        )
-    else
         camConnection:Disconnect()
         camera.CameraType = Enum.CameraType.Custom
     end
