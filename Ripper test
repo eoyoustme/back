@@ -189,15 +189,20 @@ end
         primaryPart.Anchored = true
 
         -- Khóa camera nhìn entity mỗi frame (không tween để mượt)
-        camera.CameraType = Enum.CameraType.Scriptable
-        local camConnection = RunService.RenderStepped:Connect(function()
-            if primaryPart and primaryPart.Parent then
-                camera.CFrame = CFrame.lookAt(camera.CFrame.Position, primaryPart.Position)
-            else
-                camConnection:Disconnect()
-                camera.CameraType = Enum.CameraType.Custom
-            end
-        end)
+camera.CameraType = Enum.CameraType.Scriptable
+
+local camConnection = RunService.RenderStepped:Connect(function()
+    if primaryPart and primaryPart.Parent then
+        camera.CFrame = CFrame.lookAt(
+            camera.CFrame.Position,
+            camera.CFrame.Position + Vector3.new(0, 1.5, 0)
+        )
+    else
+        camConnection:Disconnect()
+        camera.CameraType = Enum.CameraType.Custom
+    end
+end)
+
 
         -- Tính toán vị trí dừng lại 4 stud trước người chơi
         local targetPosition = humanoidRootPart.Position - humanoidRootPart.CFrame.LookVector * -6
