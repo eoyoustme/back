@@ -332,13 +332,13 @@ local start = tick()
 
 while tick() - start < flashDuration do
     imageLabel.Image = jumpscareImage1
-    task.wait(0)
+    task.wait()
     imageLabel.Image = jumpscareImage2
-    task.wait(0)
+    task.wait()
     imageLabel.Image = jumpscareImage3
-    task.wait(0)
+    task.wait()
     imageLabel.Image = jumpscareImage4
-    task.wait(0)
+    task.wait()
 end
 
 ----------------------------------------------------
