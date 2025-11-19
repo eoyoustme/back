@@ -3,13 +3,14 @@ local hum = plr.Character or plr.CharacterAdded:Wait():WaitForChild("Humanoid")
 local RS = game.ReplicatedStorage
 local LatestRoom = RS:WaitForChild("GameData"):WaitForChild("LatestRoom")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
 --=== GUI CẢNH BÁO DON'T MOVE ===--
 local function createDontMoveGUI()
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "DontMoveWarning_TEST"
 	gui.IgnoreGuiInset = true
-	gui.Parent = plr:WaitForChild("PlayerGui")
+	gui.Parent = plr.PlayerGui
 
 	local label = Instance.new("TextLabel")
 	label.Size = UDim2.new(1, 0, 0.15, 0)
@@ -32,12 +33,11 @@ local function createDontMoveGUI()
 	return gui
 end
 
---=== JUMPSCARE PHẠT KHI DI CHUYỂN ===--
+--=== JUMPSCARE PHẠT ===--
 local function triggerPunishment()
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "TestPunishScreen"
 	gui.IgnoreGuiInset = true
-	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	gui.Parent = plr.PlayerGui
 
 	local face = Instance.new("ImageLabel")
@@ -48,43 +48,48 @@ local function triggerPunishment()
 	face.BackgroundTransparency = 1
 	face.Parent = gui
 
-	-- Tween to full screen
+	-- tween lớn hình
 	TweenService:Create(
 		face,
 		TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
 		{Size = UDim2.new(1,0,1,0), Position = UDim2.new(0,0,0,0)}
 	):Play()
 
-	-- Sound
-	local sound = Instance.new("Sound")
-	sound.SoundId = "rbxassetid://6891548543"
-	sound.Volume = 4
-	sound.Parent = gui
-	sound:Play()
+	-- âm thanh
+	local s = Instance.new("Sound")
+	s.SoundId = "rbxassetid://6891548543"
+	s.Volume = 5
+	s.Parent = gui
+	s:Play()
 
 	task.delay(1, function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Smoted"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Smoted1"))()
 	end)
 end
 
---=== MAIN — TEST 100% ===--
+--=== MAIN: TEST 100% ===--
 LatestRoom.Changed:Connect(function()
-	print("[TEST] DON'T MOVE EVENT TRIGGERED (100%)")
+	print("[TEST] DON'T MOVE EVENT - 100%")
 
-	local gui = createDontMoveGUI()
+	local warningGUI = createDontMoveGUI()
+	task.wait(1)  -- đợi 1 giây sau khi hiện cảnh báo
 
-	task.wait(1) -- sau 1 giây mới tính di chuyển
 	local punished = false
 
-	local con
-	con = hum:GetPropertyChangedSignal("MoveDirection"):Connect(function()
+	--=== DÙNG HEARTBEAT ĐỂ KIỂM TRA NGƯỜI CHƠI DI CHUYỂN ===--
+	local hb
+	hb = RunService.Heartbeat:Connect(function()
 		if punished then return end
+
 		if hum.MoveDirection.Magnitude > 0 then
 			punished = true
 
-			if gui then gui:Destroy() end
+			-- xóa warning
+			if warningGUI then 
+				warningGUI:Destroy()
+			end
 
-			if con then con:Disconnect() end
+			hb:Disconnect()
 			triggerPunishment()
 		end
 	end)
