@@ -1,0 +1,134 @@
+-- SERVICES
+local TweenService = game:GetService("TweenService")
+local plr = game.Players.LocalPlayer
+
+----------------------------------------------------
+-- FUNCTION CHÍNH — JUMPSCARE + ENTITY
+----------------------------------------------------
+local function triggerPunishment()
+
+	-----------------------------------------
+	-- GUI JUMPSCARE
+	-----------------------------------------
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "PunishScreen"
+	gui.IgnoreGuiInset = true
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	gui.Parent = plr.PlayerGui
+
+	local face = Instance.new("ImageLabel")
+	face.Image = "rbxassetid://14521815351"
+	face.ImageTransparency = 0.4
+	face.Size = UDim2.new(0.2,0,0.2,0)
+	face.Position = UDim2.new(0.4,0,0.4,0)
+	face.BackgroundTransparency = 1
+	face.Parent = gui
+
+	-- Tween lớn toàn màn hình 1 giây
+	TweenService:Create(
+		face,
+		TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+		{
+			Size = UDim2.new(1,0,1,0),
+			Position = UDim2.new(0,0,0,0)
+		}
+	):Play()
+
+	-- Âm thanh
+	local s = Instance.new("Sound")
+	s.SoundId = "rbxassetid://6891548543"
+	s.Volume = 5
+	s.Parent = gui
+	s:Play()
+
+	-----------------------------------------
+	-- SPAWN ENTITY SAU JUMPSCARE
+	-----------------------------------------
+	task.wait(0.2)
+
+	local chr = plr.Character or plr.CharacterAdded:Wait()
+	local humrp = chr:WaitForChild("HumanoidRootPart")
+	local RunService = game:GetService("RunService")
+
+	local speed = 0.001
+	local Move = true
+
+	local entityModel = game:GetObjects("rbxassetid://97510678068018")[1]
+	entityModel.Parent = workspace
+	local Primary = entityModel:FindFirstChildWhichIsA("BasePart")
+	entityModel.PrimaryPart = Primary
+
+	entityModel:SetPrimaryPartCFrame(humrp.CFrame * CFrame.new(0, 0, 30))
+
+	-----------------------------------------
+	-- CHECK CAMERA
+	-----------------------------------------
+	local function isLookingAt()
+		local cam = workspace.CurrentCamera
+		local camDir = cam.CFrame.LookVector
+		local dirToEntity = (Primary.Position - cam.CFrame.Position).Unit
+		return camDir:Dot(dirToEntity) > 0.5
+	end
+
+	-----------------------------------------
+	-- TELEPORT
+	-----------------------------------------
+	task.spawn(function()
+		while entityModel and Move do
+			if not isLookingAt() then
+				entityModel:SetPrimaryPartCFrame(
+					humrp.CFrame * CFrame.new(0,0,-10)
+				)
+			end
+			task.wait(2)
+		end
+	end)
+
+	-----------------------------------------
+	-- CHASE PLAYER
+	-----------------------------------------
+	RunService.Heartbeat:Connect(function(dt)
+		if not Move then return end
+		if not entityModel.PrimaryPart then return end
+
+		local pos = entityModel.PrimaryPart.Position
+		local target = humrp.Position
+		local dir = (target - pos).Unit
+		entityModel:SetPrimaryPartCFrame(
+			CFrame.new(pos + dir * speed * dt, target)
+		)
+	end)
+
+	-----------------------------------------
+	-- HIT PLAYER
+	-----------------------------------------
+	local entityPart = entityModel:FindFirstChild("Smoted")
+	if entityPart then
+		entityPart.Touched:Connect(function(hit)
+			local hum = hit.Parent:FindFirstChild("Humanoid")
+			if hum and hit:IsDescendantOf(chr) then
+				Move = false
+
+				-- kill jumpscare
+				loadstring(
+					game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Jumpscare")
+				)()
+			end
+		end)
+	end
+
+	-----------------------------------------
+	-- AUTO REMOVE
+	-----------------------------------------
+	task.delay(60, function()
+		Move = false
+		if entityModel then
+			entityModel:Destroy()
+		end
+	end)
+end
+
+----------------------------------------------------
+-- **GỌI HÀM 100% (BẮT BUỘC PHẢI CÓ)**
+----------------------------------------------------
+triggerPunishment()
