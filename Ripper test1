@@ -311,7 +311,10 @@ imageLabel.Visible = true
 imageLabel.Parent = screenGui
 
 local jumpscareImage1 = "rbxassetid://94547864377343"
-local jumpscareImage2 = "rbxassetid://236542974"
+local jumpscareImage2 = "rbxassetid://132173691110215"
+local jumpscareImage3 = "rbxassetid://17119192587"
+local jumpscareImage4 = "rbxassetid://184251463"
+
 
 local flashDuration = 1.4
 
@@ -329,9 +332,13 @@ local start = tick()
 
 while tick() - start < flashDuration do
     imageLabel.Image = jumpscareImage1
-    task.wait()
+    task.wait(0)
     imageLabel.Image = jumpscareImage2
-    task.wait()
+    task.wait(0)
+    imageLabel.Image = jumpscareImage3
+    task.wait(0)
+    imageLabel.Image = jumpscareImage4
+    task.wait(0)
 end
 
 ----------------------------------------------------
