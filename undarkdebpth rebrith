@@ -19,7 +19,7 @@ end)
 
 local entityList = {
     {url = "https://raw.githubusercontent.com/eoyoustme2/-i-lost-my-account-is-eoyoustme-/refs/heads/main/Cease6", delay = 175},
-    {url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Ripper%20test1", delay = 150},
+    {url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Ripper%20test2", delay = 150},
     {url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/rebrith", delay = 210},
     {url = "https://raw.githubusercontent.com/eoyoustme/rebouna/refs/heads/main/Sinturaly", delay = 1000},
     {url = "https://raw.githubusercontent.com/eoyoustme/rebouna/refs/heads/main/Shocker", delay = 35},
