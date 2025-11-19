@@ -1,0 +1,141 @@
+local plr = game.Players.LocalPlayer
+local hum = plr.Character or plr.CharacterAdded:Wait():WaitForChild("Humanoid")
+local RS = game.ReplicatedStorage
+local LatestRoom = RS:WaitForChild("GameData"):WaitForChild("LatestRoom")
+local TweenService = game:GetService("TweenService")
+
+-------------------------------------------------------
+--  STATE BIẾN TOÀN CỤC
+-------------------------------------------------------
+local playerHasMoved = false
+local movementCheckConnection = nil
+
+
+-------------------------------------------------------
+--  GUI: DON'T MOVE
+-------------------------------------------------------
+local function createDontMoveGUI()
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "DontMoveWarning"
+	gui.IgnoreGuiInset = true
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	gui.Parent = plr.PlayerGui
+
+	local label = Instance.new("TextLabel")
+	label.Name = "Warning"
+	label.Size = UDim2.new(1, 0, 0.15, 0)
+	label.Position = UDim2.new(0, 0, 0.42, 0)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.FredokaOne
+	label.Text = "DON'T MOVE"
+	label.TextColor3 = Color3.fromRGB(255, 0, 0)
+	label.TextSize = 80
+	label.Parent = gui
+
+	-- Lắc liên tục
+	task.spawn(function()
+		while gui.Parent do
+			label.Rotation = math.random(-10, 10)
+			task.wait(0.05)
+		end
+	end)
+
+	return gui
+end
+
+
+-------------------------------------------------------
+--  JUMPSCARE
+-------------------------------------------------------
+local function triggerPunishment()
+	-- GUI jump scare
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "PunishScreen"
+	gui.IgnoreGuiInset = true
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	gui.Parent = plr.PlayerGui
+
+	local face = Instance.new("ImageLabel")
+	face.Image = "rbxassetid://14521815351"
+	face.ImageTransparency = 0.4
+	face.Size = UDim2.new(0.2,0,0.2,0)
+	face.Position = UDim2.new(0.4,0,0.4,0)
+	face.BackgroundTransparency = 1
+	face.Parent = gui
+
+	-- Tween lớn hết màn hình
+	TweenService:Create(
+		face,
+		TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+		{
+			Size = UDim2.new(1,0,1,0),
+			Position = UDim2.new(0,0,0,0)
+		}
+	):Play()
+
+	-- Âm thanh
+	local s = Instance.new("Sound")
+	s.SoundId = "rbxassetid://6891548543"
+	s.Volume = 5
+	s.Parent = gui
+	s:Play()
+
+	-- Sau 1 giây chạy script smote
+	task.delay(1, function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Smoted"))()
+	end)
+end
+
+
+-------------------------------------------------------
+--  SỰ KIỆN KHI NGƯỜI CHƠI DI CHUYỂN
+-------------------------------------------------------
+local function activateFearEffects(warningGUI)
+	if playerHasMoved then return end
+	playerHasMoved = true
+
+	-- Dừng theo dõi di chuyển
+	if movementCheckConnection then
+		movementCheckConnection:Disconnect()
+		movementCheckConnection = nil
+	end
+
+	-- Xoá cảnh báo DON’T MOVE
+	if warningGUI then
+		warningGUI:Destroy()
+	end
+
+	-- Kích hoạt jumpscare
+	triggerPunishment()
+end
+
+
+-------------------------------------------------------
+--  BẮT ĐẦU THEO DÕI DI CHUYỂN
+-------------------------------------------------------
+local function startMovementCheck(warningGUI)
+	playerHasMoved = false
+
+	movementCheckConnection = hum.Running:Connect(function(speed)
+		if speed > 0 then
+			activateFearEffects(warningGUI)
+		end
+	end)
+end
+
+
+-------------------------------------------------------
+--  MAIN: TEST 100%
+-------------------------------------------------------
+LatestRoom.Changed:Connect(function()
+	print("[TEST] DON'T MOVE EVENT TRIGGERED (100%)")
+
+	-- Tạo GUI cảnh báo
+	local warningGUI = createDontMoveGUI()
+
+	-- 1 giây sau mới tính di chuyển
+	task.wait(1)
+
+	-- Bắt đầu theo dõi di chuyển
+	startMovementCheck(warningGUI)
+end)
