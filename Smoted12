@@ -1,3 +1,37 @@
+local function triggerPunishment()
+	-- GUI jump scare
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "PunishScreen"
+	gui.IgnoreGuiInset = true
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	gui.Parent = plr.PlayerGui
+
+	local face = Instance.new("ImageLabel")
+	face.Image = "rbxassetid://14521815351"
+	face.ImageTransparency = 0.4
+	face.Size = UDim2.new(0.2,0,0.2,0)
+	face.Position = UDim2.new(0.4,0,0.4,0)
+	face.BackgroundTransparency = 1
+	face.Parent = gui
+
+	-- Tween lớn hết màn hình
+	TweenService:Create(
+		face,
+		TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+		{
+			Size = UDim2.new(1,0,1,0),
+			Position = UDim2.new(0,0,0,0)
+		}
+	):Play()
+
+	-- Âm thanh
+	local s = Instance.new("Sound")
+	s.SoundId = "rbxassetid://6891548543"
+	s.Volume = 5
+	s.Parent = gui
+	s:Play()
+
+
 local plr = game.Players.LocalPlayer
 local chr = plr.Character or plr.CharacterAdded:Wait()
 local humrp = chr:WaitForChild("HumanoidRootPart")
