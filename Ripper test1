@@ -8,7 +8,7 @@ local entity = spawner.Create({
 	Entity = {
 		Name = "RipperMovings",
 		Asset = "rbxassetid://128901222978905",
-		HeightOffset = 1
+		HeightOffset = 0
 	},
 	Lights = {
 		Flicker = { Enabled = false, Duration = 7 },
@@ -229,8 +229,6 @@ end)
         local longTweenInfo = TweenInfo.new(99999999999999, Enum.EasingStyle.Linear)
         local longTween = TweenService:Create(primaryPart, longTweenInfo, {CFrame = humanoidRootPart.CFrame})
         longTween:Play()
-
-        wait(0.3)
 
         -- Thay đổi TimeScale của tất cả ParticleEmitter thành 0
         SetAllParticlesTimeScale(entityModel, 0)
