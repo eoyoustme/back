@@ -3,7 +3,7 @@ local chr = plr.Character or plr.CharacterAdded:Wait()
 local humrp = chr:WaitForChild("HumanoidRootPart")
 local RunService = game:GetService("RunService")
 
-local speed = 5
+local speed = 0.001
 local Move = true
 
 local entityModel = game:GetObjects("rbxassetid://97510678068018")[1]
@@ -28,7 +28,7 @@ task.spawn(function()
 	while entityModel and Move do
 		if not isLookingAt() then
 			if entityModel and entityModel.PrimaryPart then
-				local lookPos = humrp.CFrame.LookVector * 25
+				local lookPos = humrp.CFrame.LookVector * 10
 				entityModel:SetPrimaryPartCFrame(humrp.CFrame + lookPos)
 			end
 		end
@@ -73,7 +73,7 @@ task.delay(math.random(80,125), function()
 	Move = false
 	wait(0.5)
 	if entityModel and entityModel.PrimaryPart then
-		entityModel:SetPrimaryPartCFrame(entityModel.PrimaryPart.CFrame * CFrame.new(0, -100, 0))
+		entityModel:SetPrimaryPartCFrame(entityModel.PrimaryPart.CFrame * CFrame.new(1000, -100, 1000))
 	end
 	wait(1)
 	if entityModel then
