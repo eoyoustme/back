@@ -338,6 +338,25 @@ By overwriting 'CrucifixionOverwrite' the default crucifixion callback will be r
 
 entity:SetCallback("CrucifixionOverwrite", function()
     print("Custom crucifixion callback")
+local entityModel = workspace:WaitForChild("Ripper")
+			local primaryPart = entityModel:FindFirstChild("RushNew")
+
+local ripeAttachment = primaryPart:FindFirstChild("Attachment", true)
+if ripeAttachment then
+    local emitter = ripeAttachment:FindFirstChild("ParticleEmitter2")
+    if emitter and emitter:IsA("ParticleEmitter") then
+        emitter.Texture = "rbxassetid://83070783350540" -- texture mới
+        emitter.Enabled = true
+        emitter.TimeScale = 0
+    end
+end
+
+ local sound = Instance.new("Sound", workspace)
+    sound.SoundId = "rbxassetid://139178565799394"
+    sound.Volume = 10
+    sound.PlaybackSpeed = 0.85
+    sound:Play()
+
 end)
 
 ]]--
