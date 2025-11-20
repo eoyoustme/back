@@ -61,6 +61,35 @@ local entity = spawner.Create({
 
 entity:SetCallback("OnSpawned", function()
     print("Entity has spawned")
+-- Lấy model
+local ripperModel = workspace:FindFirstChild("Ripper")
+if ripperModel then
+    -- Lấy part
+    local ripePart = ripperModel:FindFirstChild("Ripe")
+    if ripePart then
+        -- Lấy attachment
+        local ripeAttachment = ripePart:FindFirstChild("Ripe")
+        if ripeAttachment then
+            -- Lấy particle emitter
+            local particle = ripeAttachment:FindFirstChild("ParticleEmitter")
+            if particle then
+                -- Chỉnh Brightness và LightInfluence
+                particle.Brightness = 5
+                particle.LightInfluence = 0
+                print("ParticleEmitter đã được chỉnh sửa!")
+            else
+                warn("Không tìm thấy ParticleEmitter")
+            end
+        else
+            warn("Không tìm thấy Attachment 'Ripe'")
+        end
+    else
+        warn("Không tìm thấy Part 'Ripe'")
+    end
+else
+    warn("Không tìm thấy Model 'Ripper'")
+end
+
 local TweenService = game:GetService("TweenService")
 local Tweeninfo = TweenInfo.new(2.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 local color = {Color = Color3.new(255, 0, 0)}
