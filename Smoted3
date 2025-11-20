@@ -88,34 +88,65 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 	local player = game.Players.LocalPlayer
 	local character = player.Character
 	local humanoid = character:FindFirstChild("Humanoid")
-
+	local camera = workspace.CurrentCamera
+	
 	print(newHealth <= 0 and "Entity killed player" or "Entity damaged player")
 
-	---------------------------------------------------
-	--  1. ENTITY DASH VÀO PLAYER TRƯỚC (0.4 GIÂY)
-	---------------------------------------------------
-
-	local TweenService = game:GetService("TweenService")
-
-	local root = character:FindFirstChild("HumanoidRootPart")
+	--------------------------------------------------------------------
+	-- 1. LOCK CAMERA VÀO ENTITY
+	--------------------------------------------------------------------
 	local model = entity.Model
 	local base = model and model.PrimaryPart
 
+	if base then
+		camera.CameraType = Enum.CameraType.Scriptable
+		camera.CFrame = CFrame.lookAt(camera.CFrame.Position, base.Position)
+
+		-- update camera liên tục nhìn entity
+		task.spawn(function()
+			while camera.CameraType == Enum.CameraType.Scriptable do
+				if character and base then
+					camera.CFrame = CFrame.lookAt(character.Head.Position, base.Position)
+				end
+				task.wait()
+			end
+		end)
+	end
+
+	--------------------------------------------------------------------
+	-- 2. ENTITY DASH TRƯỚC MẶT PLAYER 4 STUD
+	--------------------------------------------------------------------
+	local root = character:FindFirstChild("HumanoidRootPart")
+	local TweenService = game:GetService("TweenService")
+
 	if base and root then
+		
+		-- vị trí đứng cách mặt player 4 studs
+		local targetCFrame = root.CFrame * CFrame.new(0, 0, -4)
+
 		local dash = TweenService:Create(
 			base,
 			TweenInfo.new(0.4, Enum.EasingStyle.Linear),
-			{ CFrame = root.CFrame }
+			{ CFrame = targetCFrame }
 		)
 		dash:Play()
 
-		-- Khi dash hoàn tất → bắt đầu JUMPSCARE
 		dash.Completed:Connect(function()
-			
-			---------------------------------------------------
-			--        2. BẮT ĐẦU JUMPSCARE (HIỆN GUI)
-			---------------------------------------------------
 
+			--------------------------------------------------------------------
+			-- 3. SAU KHI DỪNG TRƯỚC MẶT → STOP PARTICLES (TimeScale = 0)
+			--------------------------------------------------------------------
+			for _, obj in ipairs(model:GetDescendants()) do
+				if obj:IsA("ParticleEmitter") then
+					obj.TimeScale = 0
+				end
+			end
+
+wait(2)
+
+			--------------------------------------------------------------------
+			-- 4. BẮT ĐẦU JUMPSCARE GUI
+			--------------------------------------------------------------------
 			local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 			gui.IgnoreGuiInset = true
 
@@ -124,7 +155,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 			bg.Size = UDim2.new(1,0,1,0)
 			bg.BackgroundColor3 = Color3.new(0,0,0)
 
-			-- image jumpscare
+			-- ảnh jumpscare
 			local img = Instance.new("ImageLabel", gui)
 			img.Size = UDim2.new(0.2,0,0.2,0)
 			img.Position = UDim2.new(0.4,0,0.4,0)
@@ -154,19 +185,21 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 			noise.Image = "rbxassetid://6698199680"
 			noise.ImageTransparency = 0.7
 
-			-- chromatic ghost images
-			local red = img:Clone(); red.ImageColor3 = Color3.fromRGB(255,0,0); red.ImageTransparency = 0.5; red.Parent = gui
-			local green = img:Clone(); green.ImageColor3 = Color3.fromRGB(0,255,0); green.ImageTransparency = 0.5; green.Parent = gui
-			local blue = img:Clone(); blue.ImageColor3 = Color3.fromRGB(0,0,255); blue.ImageTransparency = 0.5; blue.Parent = gui
+			-- ghost colors
+			local red = img:Clone(); red.ImageColor3 = Color3.fromRGB(255,0,0); red.ImageTransparency=0.5; red.Parent=gui
+			local green = img:Clone(); green.ImageColor3 = Color3.fromRGB(0,255,0); green.ImageTransparency=0.5; green.Parent=gui
+			local blue = img:Clone(); blue.ImageColor3 = Color3.fromRGB(0,0,255); blue.ImageTransparency=0.5; blue.Parent=gui
 
-			-- âm thanh jumpscare
+			-- âm thanh
 			local sound = Instance.new("Sound", gui)
 			sound.SoundId = "rbxassetid://4498107260"
-			sound.PlaybackSpeed = 0.3
 			sound.Volume = 5
+			sound.PlaybackSpeed = 0.3
 			sound:Play()
 
-			-- tween zoom 6 giây
+			--------------------------------------------------------------------
+			-- 5. BẮT ĐẦU TWEEN ZOOM 6 GIÂY
+			--------------------------------------------------------------------
 			TweenService:Create(
 				img,
 				TweenInfo.new(6, Enum.EasingStyle.Linear),
@@ -176,21 +209,20 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 				}
 			):Play()
 
-			---------------------------------------------------
-			--  3. SAU 6 GIÂY → KILL PLAYER + XÓA GUI
-			---------------------------------------------------
+			--------------------------------------------------------------------
+			-- 6. SAU 6 GIÂY → XÓA GUI + KILL PLAYER + TRẢ CAMERA VỀ BÌNH THƯỜNG
+			--------------------------------------------------------------------
 			task.delay(6, function()
 
-				-- xóa GUI
-				if gui then gui:Destroy() end
+				camera.CameraType = Enum.CameraType.Custom
 
-				-- kill
+				if gui then gui:Destroy() end
 				if humanoid then humanoid.Health = 0 end
 			end)
 
-			---------------------------------------------------
-			--               GLITCH LOOP
-			---------------------------------------------------
+			--------------------------------------------------------------------
+			-- GLITCH LOOP
+			--------------------------------------------------------------------
 			task.spawn(function()
 				while gui.Parent do
 					txt.Rotation = math.random(-3,3)
@@ -211,12 +243,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 			end)
 
 		end) -- dash.Completed
-	else
-		-- fallback kill nếu thiếu part
-		if humanoid then humanoid.Health = 0 end
 	end
-
 end)
-
 ---====== Run entity ======---
 entity:Run()
