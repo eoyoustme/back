@@ -122,25 +122,28 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 	if base and root then
 		
 		-- vị trí đứng cách mặt player 4 studs
-		local targetCFrame = root.CFrame * CFrame.new(0, 0, 4)
+local targetCFrame = root.CFrame * CFrame.new(0, 0, -4)
+local dashTween = TweenService:Create(
+    base,
+    TweenInfo.new(0.4, Enum.EasingStyle.Linear),
+    { CFrame = targetCFrame }
+)
+dashTween:Play()
 
-		local dash = TweenService:Create(
-			base,
-			TweenInfo.new(0.4, Enum.EasingStyle.Linear),
-			{ CFrame = targetCFrame }
-		)
-		dash:Play()
+dashTween.Completed:Connect(function()
+    -- Freeze particle
+    for _, obj in ipairs(model:GetDescendants()) do
+        if obj:IsA("ParticleEmitter") then
+            obj.TimeScale = 0
+        end
+    end
 
-		dash.Completed:Connect(function()
-
-			--------------------------------------------------------------------
-			-- 3. SAU KHI DỪNG TRƯỚC MẶT → STOP PARTICLES (TimeScale = 0)
-			--------------------------------------------------------------------
-			for _, obj in ipairs(model:GetDescendants()) do
-				if obj:IsA("ParticleEmitter") then
-					obj.TimeScale = 0
-				end
-			end
+    -- Tween cực dài để giữ nguyên vị trí (stand still)
+    TweenService:Create(
+        base,
+        TweenInfo.new(99999999, Enum.EasingStyle.Linear),
+        { CFrame = targetCFrame }
+    ):Play()
 
 wait(2)
 
