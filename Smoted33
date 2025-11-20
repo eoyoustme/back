@@ -122,7 +122,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 	if base and root then
 		
 		-- vị trí đứng cách mặt player 4 studs
-		local targetCFrame = root.CFrame * CFrame.new(0, 0, -4)
+		local targetCFrame = root.CFrame * CFrame.new(0, 0, 4)
 
 		local dash = TweenService:Create(
 			base,
