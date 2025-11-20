@@ -85,14 +85,20 @@ end)
 
 ---====== DAMAGE CALLBACK + JUMPSCARE ======---
 entity:SetCallback("OnDamagePlayer", function(newHealth)
+	local player = game.Players.LocalPlayer
+	local character = player.Character
+	local humanoid = character and character:FindFirstChild("Humanoid")
+
 	if newHealth <= 0 then
 		print("Entity killed player")
 	else
 		print("Entity damaged player")
 	end
 
-	-- === JUMPSCARE ===
-	local player = game.Players.LocalPlayer
+	---------------------------------------------------
+	--              JUMPSCARE START
+	---------------------------------------------------
+
 	local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 	gui.IgnoreGuiInset = true
 
@@ -131,10 +137,10 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 	noise.Image = "rbxassetid://6698199680"
 	noise.ImageTransparency = 0.7
 
-	-- Chromatic layers
-	local red = img:Clone(); red.ImageColor3 = Color3.fromRGB(255,0,0); red.ImageTransparency=0.5; red.Parent=gui
-	local green = img:Clone(); green.ImageColor3 = Color3.fromRGB(0,255,0); green.ImageTransparency=0.5; green.Parent=gui
-	local blue = img:Clone(); blue.ImageColor3 = Color3.fromRGB(0,0,255); blue.ImageTransparency=0.5; blue.Parent=gui
+	-- Chromatic copies
+	local red = img:Clone(); red.ImageColor3 = Color3.fromRGB(255,0,0); red.ImageTransparency=0.5; red.Parent = gui
+	local green = img:Clone(); green.ImageColor3 = Color3.fromRGB(0,255,0); green.ImageTransparency=0.5; green.Parent = gui
+	local blue = img:Clone(); blue.ImageColor3 = Color3.fromRGB(0,0,255); blue.ImageTransparency=0.5; blue.Parent = gui
 
 	-- Âm thanh
 	local sound = Instance.new("Sound", gui)
@@ -143,16 +149,60 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 	sound.PlaybackSpeed = 0.3
 	sound:Play()
 
-	-- Tween zoom
+	-- Tween zoom 6 giây
 	local TweenService = game:GetService("TweenService")
-	TweenService:Create(img, TweenInfo.new(6, Enum.EasingStyle.Linear), {
-		Size = UDim2.new(1,0,1,0),
-		Position = UDim2.new(0,0,0,0)
-	}):Play()
+	TweenService:Create(
+		img,
+		TweenInfo.new(6, Enum.EasingStyle.Linear),
+		{
+			Size = UDim2.new(1,0,1,0),
+			Position = UDim2.new(0,0,0,0)
+		}
+	):Play()
 
-	-- Glitch loop
+
+	---------------------------------------------------
+	--  SAU 6 GIÂY: GUI DESTROY + ENTITY DASH + KILL
+	---------------------------------------------------
+	task.delay(6, function()
+
+		-- Xóa GUI
+		if gui then
+			gui:Destroy()
+		end
+
+		-- Player root
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		-- Model của entity
+		local model = entity.Model
+		local base = model and model.PrimaryPart
+
+		if base and root then
+			local dash = TweenService:Create(
+				base,
+				TweenInfo.new(0.4, Enum.EasingStyle.Linear),
+				{ CFrame = root.CFrame }
+			)
+			dash:Play()
+
+			-- Khi dash xong → Kill player
+			dash.Completed:Connect(function()
+				if humanoid then
+					humanoid.Health = 0
+				end
+			end)
+		else
+			-- fallback nếu thiếu part
+			if humanoid then humanoid.Health = 0 end
+		end
+	end)
+
+
+	---------------------------------------------------
+	--                GLITCH LOOP
+	---------------------------------------------------
 	task.spawn(function()
-		while true do
+		while gui.Parent do
 			txt.Rotation = math.random(-3,3)
 			txt.TextColor3 = Color3.fromRGB(255,math.random(0,80),math.random(0,80))
 			txt.Position = UDim2.new(0 + math.random(-5,5)/200,0,0.75 + math.random(-5,5)/300,0)
@@ -169,7 +219,9 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 			task.wait(0.03)
 		end
 	end)
+
 end)
+
 
 ---====== Run entity ======---
 entity:Run()
