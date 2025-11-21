@@ -9,10 +9,7 @@ local entity = spawner.Create({
 		HeightOffset = 0
 	},
 	Lights = {
-		Flicker = {
-			Enabled = false,
-			Duration = 7
-		},
+		Flicker = { Enabled = false, Duration = 7 },
 		Shatter = false,
 		Repair = false
 	},
@@ -27,12 +24,8 @@ local entity = spawner.Create({
 		Delay = 0,
 		Reversed = false
 	},
-	Rebounding = {
-		Enabled = false
-	},
-	Damage = {
-		Enabled = false
-	},
+	Rebounding = { Enabled = false },
+	Damage = { Enabled = false },
 	Crucifixion = {
 		Enabled = true,
 		Range = 40,
@@ -45,45 +38,40 @@ local entity = spawner.Create({
 			"Bạn đã chết bởi Cease.",
 			"Khi Cease xuất hiện, đừng di chuyển nếu không bạn sẽ chết."
 		},
-		Cause = ""
+		Cause = "Cease"
 	}
 })
 
----====== Debug entity ======---
-
+---====== On Spawn ======---
 entity:SetCallback("OnSpawned", function()
-    print("Cease đã xuất hiện")
+	print("Cease đã xuất hiện")
 
-	-- Hiệu ứng ánh sáng xanh khi xuất hiện
 	local TweenService = game:GetService("TweenService")
 	local Tweeninfo = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-	local color = {Color = Color3.new(0, 0, 255)}
+	local spawnColor = {Color = Color3.new(0, 0, 255)}
 
 	for _, v in pairs(workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:GetDescendants()) do
 		if v:IsA("Light") then
-			TweenService:Create(v, Tweeninfo, color):Play()
+			TweenService:Create(v, Tweeninfo, spawnColor):Play()
 		elseif v.Parent and v.Parent.Name == "LightFixture" then
-			TweenService:Create(v.Parent, Tweeninfo, color):Play()
+			TweenService:Create(v.Parent, Tweeninfo, spawnColor):Play()
 		end
 	end
 
-	-- === BẮT ĐẦU FIX PHÁT HIỆN DI CHUYỂN === --
-
+	-- === BẮT ĐẦU KIỂM TRA DI CHUYỂN CHUẨN XÁC === --
 	local Players = game:GetService("Players")
 	local RunService = game:GetService("RunService")
 
-	-- Đợi chắc chắn Cease spawn
+	-- đảm bảo Cease chính xác có model
 	repeat task.wait() until entity.Model
 	local ceaseModel = entity.Model
 
 	local hitboxRange = 120
 
-	-- Raycast params để không bị chắn bởi tường
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Blacklist
 	params.FilterDescendantsInstances = {ceaseModel}
 
-	-- Vòng lặp Heartbeat
 	local raycastLoop
 	raycastLoop = RunService.Heartbeat:Connect(function()
 		local origin = ceaseModel:GetPivot().Position
@@ -91,20 +79,26 @@ entity:SetCallback("OnSpawned", function()
 		for _, player in ipairs(Players:GetPlayers()) do
 			local chr = player.Character
 			if chr and chr:FindFirstChild("HumanoidRootPart") and chr:FindFirstChild("Humanoid") then
+				
 				local hrp = chr.HumanoidRootPart
 				local humanoid = chr.Humanoid
-
+				
+				-- Raycast
 				local direction = (hrp.Position - origin).Unit
 				local rayResult = workspace:Raycast(origin, direction * hitboxRange, params)
 
 				if rayResult and rayResult.Instance and rayResult.Instance:IsDescendantOf(chr) then
 
-					-- kiểm tra di chuyển bằng velocity (ổn định hơn MoveDirection)
-					if hrp.AssemblyLinearVelocity.Magnitude > 0.5 then
+					-- KIỂM TRA DI CHUYỂN CHUẨN
+					local isMovingByInput = humanoid.MoveDirection.Magnitude > 0.1
+					local isMovingByVelocity = hrp.AssemblyLinearVelocity.Magnitude > 2
+
+					-- Chỉ giết khi cả hai đều đúng
+					if isMovingByInput and isMovingByVelocity then
 						humanoid.Health = 0
 						print(player.Name .. " bị Cease giết vì di chuyển!")
 
-						-- Ghi nguyên nhân cái chết
+						-- đánh dấu nguyên nhân chết
 						local statsFolder = game.ReplicatedStorage:FindFirstChild("GameStats")
 						if statsFolder then
 							local playerStats = statsFolder:FindFirstChild("Player_" .. player.Name)
@@ -118,43 +112,43 @@ entity:SetCallback("OnSpawned", function()
 		end
 	end)
 
-    -- Ngắt loop khi despawn
-    entity:SetCallback("OnDespawned", function()
-        print("Cease đã biến mất")
-        
-        if raycastLoop then
-            raycastLoop:Disconnect()
-        end
+	---====== On Despawn ======---
+	entity:SetCallback("OnDespawned", function()
+		print("Cease đã biến mất")
 
-        -- Hiệu ứng ánh sáng khi biến mất (màu hồng)
-        local TweenService = game:GetService("TweenService")
-		local Tweeninfo = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-		local color = {Color = Color3.new(1, 0, 1)}
+		if raycastLoop then
+			raycastLoop:Disconnect()
+		end
+
+		-- Hiệu ứng ánh sáng khi biến mất
+		local Tweeninfo2 = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+		local despawnColor = {Color = Color3.new(1, 0, 1)}
 
 		for _, v in pairs(workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:GetDescendants()) do
 			if v:IsA("Light") then
-				TweenService:Create(v, Tweeninfo, color):Play()
+				TweenService:Create(v, Tweeninfo2, despawnColor):Play()
 			elseif v.Parent and v.Parent.Name == "LightFixture" then
-				TweenService:Create(v.Parent, Tweeninfo, color):Play()
+				TweenService:Create(v.Parent, Tweeninfo2, despawnColor):Play()
 			end
 		end
 
-        -- Thành tích khi gặp Cease
-        local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Idk-lol2/a-60aa/refs/heads/main/fix%20bage.txt"))()
-        achievementGiver({
-            Title = "Get out of the way",
-            Desc = "Where is it?",
-            Reason = "Encounter Cease",
-            Image = "rbxassetid://104367200417966"
-        })
-    end)
+		-- Achievement
+		local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Idk-lol2/a-60aa/refs/heads/main/fix%20bage.txt"))()
+		achievementGiver({
+			Title = "Get out of the way",
+			Desc = "Where is it?",
+			Reason = "Encounter Cease",
+			Image = "rbxassetid://104367200417966"
+		})
+	end)
 end)
 
+---====== Damage Callback ======---
 entity:SetCallback("OnDamagePlayer", function(newHealth)
 	if newHealth == 0 then
 		print("Cease đã giết người chơi")
 	else
-		print("Cease gây sát thương cho người chơi")
+		print("Cease gây sát thương")
 	end
 end)
 
