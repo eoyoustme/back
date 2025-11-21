@@ -65,7 +65,7 @@ entity:SetCallback("OnSpawned", function()
     print("Cease đã xuất hiện")
 
    local TweenService = game:GetService("TweenService")
-local Tweeninfo = TweenInfo.new(2.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local Tweeninfo = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 local color = {Color = Color3.new(0, 0, 255)}
 
 for _, v in pairs(workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:GetDescendants()) do
@@ -127,11 +127,17 @@ end
         end
 
         -- Hiệu ứng ánh sáng khi biến mất
-        game.Lighting.MainColorCorrection.TintColor = Color3.fromRGB(69, 72, 255)
-        game.Lighting.MainColorCorrection.Contrast = 10
-        TweenService:Create(game.Lighting.MainColorCorrection, TweenInfo.new(2.5), {Contrast = 0}):Play()
-        TweenService:Create(game.Lighting.MainColorCorrection, TweenInfo.new(5), {TintColor = Color3.fromRGB(255, 255, 255)}):Play()
+        local TweenService = game:GetService("TweenService")
+local Tweeninfo = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+local color = {Color = Color3.new(255, 0, 255)}
 
+for _, v in pairs(workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:GetDescendants()) do
+    if v:IsA("Light") then
+        TweenService:Create(v, Tweeninfo, color):Play()
+    elseif v.Parent.Name == "LightFixture" then
+        TweenService:Create(v.Parent, Tweeninfo, color):Play()
+    end
+end
         -- Thành tích khi gặp Cease
         local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Idk-lol2/a-60aa/refs/heads/main/fix%20bage.txt"))()
         achievementGiver({
