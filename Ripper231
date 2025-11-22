@@ -62,6 +62,16 @@ local entity = spawner.Create({
 
 entity:SetCallback("OnSpawned", function()
 	print("Entity has spawned")
+local ripeAttachment = primaryPart:FindFirstChild("ripe", true)
+if ripeAttachment then
+    local emitter = ripeAttachment:FindFirstChild("ParticleEmitter")
+    if emitter and emitter:IsA("ParticleEmitter") then
+        emitter.Texture = "rbxassetid://91764668708567" -- texture mới
+        emitter.Enabled = true
+        emitter.TimeScale = 1
+    end
+end
+
 	local TweenService = game:GetService("TweenService")
 	local Tweeninfo = TweenInfo.new(2.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 	local color = {Color = Color3.new(255, 0, 0)}
