@@ -9,8 +9,8 @@ local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/Regul
 local entity = spawner.Create({
 	Entity = {
 		Name = "Ripper",
-		Asset = "rbxassetid://130339930471583",
-		HeightOffset = 1
+		Asset = "rbxassetid://97729988803961",
+		HeightOffset = 0
 	},
 	Lights = {
 		Flicker = {
@@ -82,7 +82,7 @@ end)
 entity:SetCallback("OnEnterRoom", function(room, firstTime)
 	if firstTime then
 		print("Entity entered room:", room.Name)
-		entity.Config.Movement.Speed = entity.Config.Movement.Speed * 1.2
+		entity.Config.Movement.Speed = entity.Config.Movement.Speed * 1.01
 	else
 		print("Entity returned to room:", room.Name)
 	end
@@ -147,7 +147,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
     task.spawn(function()
         while to and primaryPart.Parent and humanoidRootPart.Parent do
             local targetCFrame = humanoidRootPart.CFrame
-            local tween = TweenService:Create(primaryPart, TweenInfo.new(20000000, Enum.EasingStyle.Quad), {CFrame = targetCFrame})
+            local tween = TweenService:Create(primaryPart, TweenInfo.new(20000000000, Enum.EasingStyle.Quad), {CFrame = targetCFrame})
             tween:Play()
             tween.Completed:Wait()
         end
@@ -169,9 +169,9 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
     -- Đảm bảo entityModel đã tồn tại
 local ripeAttachment = primaryPart:FindFirstChild("ripe", true)
 if ripeAttachment then
-    local emitter = ripeAttachment:FindFirstChild("2")
+    local emitter = ripeAttachment:FindFirstChild("ParticleEmitter")
     if emitter and emitter:IsA("ParticleEmitter") then
-        emitter.Texture = "rbxassetid://16025871152" -- texture mới
+        emitter.Texture = "rbxassetid://12737595583" -- texture mới
         emitter.Enabled = true
         emitter.TimeScale = 0
     end
