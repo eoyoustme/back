@@ -29,7 +29,7 @@ local entity = spawner.Create({
 		Values = {10.5, 40, 0.1, 1}
 	},
 	Movement = {
-		Speed = 125,
+		Speed = 225,
 		Delay = 5.771,
 		Reversed = false
 	},
@@ -66,7 +66,7 @@ local ripeAttachment = primaryPart:FindFirstChild("ripe", true)
 if ripeAttachment then
     local emitter = ripeAttachment:FindFirstChild("ParticleEmitter")
     if emitter and emitter:IsA("ParticleEmitter") then
-        emitter.Texture = "rbxassetid://91764668708567" -- texture mới
+        emitter.Texture = "rbxassetid://122831385820762" -- texture mới
         emitter.Enabled = true
         emitter.TimeScale = 1
     end
