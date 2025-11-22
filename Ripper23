@@ -10,7 +10,7 @@ local entity = spawner.Create({
 	Entity = {
 		Name = "Ripper",
 		Asset = "rbxassetid://97729988803961",
-		HeightOffset = 7
+		HeightOffset = 5
 	},
 	Lights = {
 		Flicker = {
