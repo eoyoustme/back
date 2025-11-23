@@ -214,7 +214,7 @@ task.spawn(function()
     while tick() - damageStartTime < damageDuration and humanoid and humanoid.Health > 0 do
         if character:GetAttribute("Hiding") then break end
         humanoid.Health = humanoid.Health - 5
-        task.wait(0.04)
+        task.wait(0.2)
     end
 
     ----------------------------------------
@@ -252,6 +252,7 @@ task.spawn(function()
             Size = UDim2.fromScale(0.95, 0.95)
         })
         tween:Play()
+wait(4)
 gui:Destroy()
     end
 
