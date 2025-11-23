@@ -252,6 +252,7 @@ task.spawn(function()
             Size = UDim2.fromScale(0.95, 0.95)
         })
         tween:Play()
+gui:Destroy()
     end
 
     ----------------------------------------
@@ -260,7 +261,6 @@ task.spawn(function()
     if Jumpscare then
         Jumpscare:Stop()
         Jumpscare:Destroy()
-        gui:Destroy()
     end
 
     if camConnection then
