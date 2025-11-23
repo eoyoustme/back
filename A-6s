@@ -246,7 +246,7 @@ task.spawn(function()
         img.Rotation = rotationList[math.random(1, #rotationList)]
 
         -- Tween hiện jumpscare
-        local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+        local tweenInfo = TweenInfo.new(0.75, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
         local tween = TweenService:Create(img, tweenInfo, {
             ImageTransparency = 0,
             Size = UDim2.fromScale(0.95, 0.95)
@@ -260,6 +260,7 @@ task.spawn(function()
     if Jumpscare then
         Jumpscare:Stop()
         Jumpscare:Destroy()
+        gui:Destroy()
     end
 
     if camConnection then
