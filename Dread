@@ -1,0 +1,134 @@
+--== WAIT LATEST ROOM ==--
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Lighting = game.Lighting
+local Debris = game:GetService("Debris")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local HumanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local CurrentRooms = workspace.CurrentRooms
+local currentLoadedRoom = game.ReplicatedStorage.GameData.LatestRoom.Value
+local SpawnVariable = CurrentRooms:FindFirstChild(currentLoadedRoom)
+
+--== COLOR CORRECTION EFFECT ==--
+local CC = Lighting:FindFirstChild("MainColorCorrection") or Instance.new("ColorCorrectionEffect", Lighting)
+CC.Name = "MainColorCorrection"
+CC.Brightness = 150/255 -- Bắt đầu sáng 150
+
+local debounce = false
+
+--== SPAWN DREAD FUNCTION ==--
+local function spawnDread()
+    local Dread = game:GetObjects("rbxassetid://102513543133275")[1]
+    Dread.Parent = workspace
+    Dread.PrimaryPart = Dread:FindFirstChildWhichIsA("BasePart")
+    Dread.PrimaryPart.Anchored = true
+    Dread.PrimaryPart.CanCollide = false
+    Dread.PrimaryPart.Position = SpawnVariable.Parts.Floor.Position + Vector3.new(0,6,0)
+
+    wait(5)
+
+    local function death()
+        debounce = true
+
+        -- LOCK CAMERA VÀO DREAD
+        local cam = workspace.CurrentCamera
+        local camCon
+        camCon = RunService.RenderStepped:Connect(function()
+            if Dread.PrimaryPart then
+                cam.CFrame = CFrame.new(cam.CFrame.Position, Dread.PrimaryPart.Position)
+            else
+                camCon:Disconnect()
+            end
+        end)
+
+        wait(3)
+
+        --== PHÁT ÂM THANH ==--
+        local function GetGitSound(GithubSnd, SoundName)
+            if not isfile(SoundName .. ".mp3") then
+                writefile(SoundName .. ".mp3", game:HttpGet(GithubSnd))
+            end
+            local sound = Instance.new("Sound")
+            sound.SoundId = (getcustomasset or getsynasset)(SoundName .. ".mp3")
+            return sound
+        end
+
+        local spawnSound = GetGitSound("https://github.com/Tinkgy111/Bang/blob/main/lv_0_20250111000930.mp3?raw=true", "spawner")
+        spawnSound.Parent = workspace
+        spawnSound.Volume = 3
+        spawnSound:Play()
+
+        -- TẮT PARTICLE EMITTER
+        for _, v in pairs(Dread:GetDescendants()) do
+            if v:IsA("ParticleEmitter") then
+                v.TimeScale = 0
+            end
+        end
+
+        -- REMOVE DREAD SAU 4 GIÂY
+        Debris:AddItem(Dread, 4)
+
+        -- GIẢM SÁNG NGAY LẬP TỨC
+        CC.Contrast = 10000
+        CC.Saturation = 10000
+        wait(4)
+
+        -- TELE PLAYER VỀ FLOOR
+        RunService.RenderStepped:Connect(function()
+            HumanoidRootPart.Position = SpawnVariable.Parts.Floor.Position
+        end)
+
+        -- CAMERA SHAKE
+        local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+        local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+            cam.CFrame = cam.CFrame * shakeCf
+        end)
+        camShake:Start()
+        camShake:ShakeOnce(90, 90, 90, 90.5, 90, 95)
+
+        wait(7)
+        player.Character.Humanoid:TakeDamage(125)
+        SpawnVariable.Parts.Floor:Destroy()
+    end
+
+    --== KIỂM TRA RAY + SCREEN ==--
+    task.spawn(function()
+        while task.wait() do
+            if debounce == true then break end
+
+            local _, onScreen = workspace.CurrentCamera:WorldToScreenPoint(Dread.PrimaryPart.Position)
+            local ray = workspace:Raycast(Dread.PrimaryPart.Position, HumanoidRootPart.Position - Dread.PrimaryPart.Position)
+            if ray and ray.Instance then
+                if ray.Instance.Parent == character or ray.Instance.Parent.Parent == character then
+                    if onScreen then
+                        death()
+                    end
+                end
+            end
+        end
+    end)
+end
+
+--== GIẢM SÁNG NGẪU NHIÊN TRƯỚC KHI SPAWN DREAD ==--
+task.spawn(function()
+    local currentBrightness = 150
+    local targetBrightness = 80
+
+    while currentBrightness > targetBrightness do
+        local randomDrop = math.random(1,6)  -- giảm ngẫu nhiên
+        currentBrightness -= randomDrop
+        if currentBrightness < targetBrightness then
+            currentBrightness = targetBrightness
+        end
+        CC.Brightness = currentBrightness / 255
+        task.wait(0.05)
+    end
+
+    -- Khi sáng ≤ 80 → spawn Dread
+    spawnDread()
+end)
