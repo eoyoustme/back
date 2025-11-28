@@ -94,34 +94,36 @@ local blur = Instance.new("BlurEffect", Lighting)
 blur.Size = 0
 blur.Enabled = false
 
--- Hàm cập nhật hiệu ứng
+-- Hàm tắt hiệu ứng hoàn toàn
+local function disableEffect()
+	cc.Enabled = false
+	cc.Contrast = 0
+	blur.Enabled = false
+	blur.Size = 0
+end
+
+-- Hàm cập nhật hiệu ứng theo khoảng cách
 local function updateEffect(distance)
-	if distance > 100 then
-		-- Tắt dần hiệu ứng
-		cc.Enabled = false
-		blur.Enabled = false
+	if distance > 80 then
+		disableEffect()
 		return
 	end
 
 	cc.Enabled = true
 	blur.Enabled = true
 
-	-- 100 → 80  → nhiễu nhẹ
-	-- 80  → 60  → nhiễu vừa
-	-- 60  → 50  → nặng
-	-- <50 → cực nặng
-	if distance <= 50 then
-		cc.Contrast = 0.8
+	if distance <= 30 then
+		cc.Contrast = 0.9
+		blur.Size = 45
+	elseif distance <= 40 then
+		cc.Contrast = 0.7
 		blur.Size = 30
-	elseif distance <= 60 then
-		cc.Contrast = 0.6
+	elseif distance <= 50 then
+		cc.Contrast = 0.5
 		blur.Size = 20
-	elseif distance <= 80 then
-		cc.Contrast = 0.4
+	else
+		cc.Contrast = 0.3
 		blur.Size = 12
-	else -- <= 100
-		cc.Contrast = 0.2
-		blur.Size = 6
 	end
 end
 
@@ -129,6 +131,12 @@ end
 game:GetService("RunService").RenderStepped:Connect(function()
 	local char = player.Character
 	if not char then return end
+
+	-- 🔥 Nếu đang trốn → tắt hiệu ứng và return
+	if char:GetAttribute("Hiding") == true then
+		disableEffect()
+		return
+	end
 
 	local root = char:FindFirstChild("HumanoidRootPart")
 	if not root or not smiler then return end
