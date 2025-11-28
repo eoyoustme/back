@@ -8,7 +8,7 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("
 
     local sound = Instance.new("Sound", workspace)
     sound.SoundId = "rbxassetid://9113731969"
-    sound.Volume = 1
+    sound.Volume = 4
     sound.Looped = true
     sound:Play()
 
