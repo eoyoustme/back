@@ -6,9 +6,15 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("
 wait(2)
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Make by y79g8n aka thanhphok(modeler) (Scripter) (Art by roblox studio)", true)
 
+    local sound = Instance.new("Sound", workspace)
+    sound.SoundId = "rbxassetid://9113731969"
+    sound.Volume = 1
+    sound.Looped = true
+    sound:Play()
+
 local entityList = {
     {url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Depthter", delay = 235},
-    {url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Smiler3", delay = 20},
+    {url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Smiler3", delay = 180},
     {url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Angel", delay = 310},
     {url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Munci", delay = 500},
 }
