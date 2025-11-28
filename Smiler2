@@ -114,8 +114,22 @@ local noise = Instance.new("ImageLabel", gui)
 noise.Size = UDim2.new(1, 0, 1, 0)
 noise.Position = UDim2.new(0, 0, 0, 0)
 noise.BackgroundTransparency = 1
-noise.Image = "rbxassetid://10218295778" -- ảnh glitch của bạn
 noise.ImageTransparency = 1
+
+-- IDs ảnh glitch
+local img1 = "rbxassetid://236542975"
+local img2 = "rbxassetid://132173691110215"
+
+-- 🔥 LOOP CHUYỂN ĐỔI ẢNH NHIỄU MỖI 0.05 GIÂY
+task.spawn(function()
+	while true do
+		noise.Image = img1
+		task.wait(0.001)
+		noise.Image = img2
+		task.wait(0.001)
+	end
+end)
+
 
 
 -- Hàm kiểm tra một sound có thuộc Smiler không (ngoại lệ)
