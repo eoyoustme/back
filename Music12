@@ -8,7 +8,7 @@ local function GetGitSound(GithubSnd, SoundName)
                 return sound
 end
 -- Lấy âm thanh từ GitHub
-local Jumpscare = GetGitSound("https://github.com/nervehammer1/throwawaystuff/raw/refs/heads/main/NightmareAmbient.mp3", "NightmareModeAmbient")
+local Jumpscare = GetGitSound("https://github.com/nervehammer1/throwawaystuff/raw/refs/heads/main/NightmareAmbient.mp3", "Nightmare")
 Jumpscare.Parent = workspace
 Jumpscare.Volume = 1
 Jumpscare.PlaybackSpeed = 1
