@@ -208,7 +208,7 @@ task.spawn(function()
     end)
 
     -- Damage trong 2 giây
-    local damageDuration = 2
+    local damageDuration = 4
     local damageStartTime = tick()
 
     while tick() - damageStartTime < damageDuration and humanoid and humanoid.Health > 0 do
