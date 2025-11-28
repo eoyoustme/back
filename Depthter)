@@ -18,7 +18,7 @@ if game.Workspace:FindFirstChild("SeekMovingNewClone") or
 end
 
 local Kill = true
-local depthsTer = game:GetObjects("rbxassetid://103636366099748")[1] -- Load DepthsTer from the ID
+local depthsTer = game:GetObjects("rbxassetid://97132943749737")[1] -- Load DepthsTer from the ID
 depthsTer.Parent = game.Workspace
 
 local part = depthsTer:FindFirstChildWhichIsA("BasePart") or depthsTer:FindFirstChildWhichIsA("Part")
