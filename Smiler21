@@ -117,8 +117,8 @@ noise.BackgroundTransparency = 1
 noise.ImageTransparency = 1
 
 -- IDs ảnh glitch
-local img1 = "rbxassetid://236542975"
-local img2 = "rbxassetid://132173691110215"
+local img1 = "rbxassetid://184251463"
+local img2 = "rbxassetid://236777653"
 
 -- 🔥 LOOP CHUYỂN ĐỔI ẢNH NHIỄU MỖI 0.05 GIÂY
 task.spawn(function()
