@@ -1,0 +1,145 @@
+---====== Load spawner ======---
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+
+---====== Create entity ======---
+local entity = spawner.Create({
+	Entity = {
+		Name = "Angel",
+		Asset = "rbxassetid://78840029047747",
+		HeightOffset = 0
+	},
+	Lights = {
+		Flicker = { Enabled = false, Duration = 7 },
+		Shatter = false,
+		Repair = false
+	},
+	Earthquake = { Enabled = false },
+	CameraShake = {
+		Enabled = true,
+		Range = 100,
+		Values = {3, 3, 2, 2}
+	},
+	Movement = {
+		Speed = 60,
+		Delay = 0,
+		Reversed = false
+	},
+	Rebounding = { Enabled = false },
+	Damage = { Enabled = false },
+	Crucifixion = {
+		Enabled = true,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding",
+		Hints = {
+			"Bạn đã chết bởi Cease.",
+			"Khi Cease xuất hiện, đừng di chuyển nếu không bạn sẽ chết."
+		},
+		Cause = "Cease"
+	}
+})
+
+---====== On Spawn ======---
+entity:SetCallback("OnSpawned", function()
+	print("Cease đã xuất hiện")
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("DON'T MOVE", true)
+
+wait(3)
+
+	-- === BẮT ĐẦU KIỂM TRA DI CHUYỂN CHUẨN XÁC === --
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+repeat task.wait() until entity.Model
+local ceaseModel = entity.Model
+
+-- Phạm vi Cease có thể jumpscare
+local detectRange = 120 -- có thể chỉnh theo ý bạn
+
+-- Lưu trạng thái jumpscare để không spam
+local scaredPlayers = {}
+
+RunService.Heartbeat:Connect(function()
+	local ceasePos = ceaseModel:GetPivot().Position
+
+	for _, player in ipairs(Players:GetPlayers()) do
+		local char = player.Character
+		if char then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			local humanoid = char:FindFirstChild("Humanoid")
+
+			if hrp and humanoid then
+				local distance = (hrp.Position - ceasePos).Magnitude
+
+				-- Trong phạm vi
+				if distance <= detectRange then
+
+					-- Kiểm tra di chuyển
+					local isMovingByInput = humanoid.MoveDirection.Magnitude > 0.1
+					local isMovingByVelocity = hrp.AssemblyLinearVelocity.Magnitude > 2
+
+					if isMovingByInput and isMovingByVelocity then
+
+						if not scaredPlayers[player] then
+							scaredPlayers[player] = true
+
+							-- 🔥 CHẠY JUMPSCARE
+							task.spawn(function()
+								loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Jumpscare123"))()
+							end)
+						end
+					end
+
+				else
+					-- Reset khi ra khỏi phạm vi
+					scaredPlayers[player] = nil
+				end
+			end
+		end
+	end
+end)
+	---====== On Despawn ======---
+	entity:SetCallback("OnDespawned", function()
+		print("Cease đã biến mất")
+
+		if raycastLoop then
+			raycastLoop:Disconnect()
+		end
+
+		-- Hiệu ứng ánh sáng khi biến mất
+		local Tweeninfo2 = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+		local despawnColor = {Color = Color3.new(1, 0, 1)}
+
+		for _, v in pairs(workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:GetDescendants()) do
+			if v:IsA("Light") then
+				TweenService:Create(v, Tweeninfo2, despawnColor):Play()
+			elseif v.Parent and v.Parent.Name == "LightFixture" then
+				TweenService:Create(v.Parent, Tweeninfo2, despawnColor):Play()
+			end
+		end
+
+		-- Achievement
+		local achievementGiver = loadstring(game:HttpGet("https://raw.githubusercontent.com/Idk-lol2/a-60aa/refs/heads/main/fix%20bage.txt"))()
+		achievementGiver({
+			Title = "Get out of the way",
+			Desc = "Where is it?",
+			Reason = "Encounter Cease",
+			Image = "rbxassetid://104367200417966"
+		})
+	end)
+end)
+
+---====== Damage Callback ======---
+entity:SetCallback("OnDamagePlayer", function(newHealth)
+	if newHealth == 0 then
+		print("Cease đã giết người chơi")
+	else
+		print("Cease gây sát thương")
+	end
+end)
+
+---====== Run entity ======---
+entity:Run()
