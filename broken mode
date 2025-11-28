@@ -1,0 +1,29 @@
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Real brokem mode made by TheDarkMan34 this is my remake version open doors to load script", true)
+
+game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Broken mode Remake has active", true)
+wait(2)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Make by y79g8n aka thanhphok(modeler) (Scripter) (Art by roblox studio)", true)
+
+pcall(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Music"))()
+end)
+
+local entityList = {
+    {url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Depthter", delay = 235},
+    {url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Smiler3", delay = 180},
+    {url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Angel", delay = 310},
+    {url = "https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Munci", delay = 500},
+}
+
+for _, entity in ipairs(entityList) do
+    coroutine.wrap(function()
+        while true do
+            wait(entity.delay)
+            pcall(function()
+                loadstring(game:HttpGet(entity.url))()
+            end)
+        end
+    end)()
+end
