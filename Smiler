@@ -52,7 +52,7 @@ local entity = spawner.Create({
 	},
 	Death = {
 		Type = "Guiding", -- "Curious"
-		Hints = {"Death", "Hints", "Go", "Here"},
+		Hints = {"You die to SMile", "If he spawn will charge to red light", "carefully"},
 		Cause = ""
 	}
 })
@@ -94,17 +94,62 @@ local blur = Instance.new("BlurEffect", Lighting)
 blur.Size = 0
 blur.Enabled = false
 
+-- 🔥 TẠO LỚP ẢNH NHIỄU MÀN HÌNH
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.IgnoreGuiInset = true
+
+local noise = Instance.new("ImageLabel", gui)
+noise.Size = UDim2.new(1, 0, 1, 0)
+noise.Position = UDim2.new(0, 0, 0, 0)
+noise.BackgroundTransparency = 1
+noise.Image = "rbxassetid://10218295778" -- ⚠️ thay bằng ảnh glitch của bạn
+noise.ImageTransparency = 1              -- Bắt đầu ẩn
+
+-- 🔥 Lấy tất cả âm thanh trong Workspace để chỉnh hiệu ứng
+local function getAllSounds()
+	local sounds = {}
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Sound") then
+			table.insert(sounds, obj)
+		end
+	end
+	return sounds
+end
+
+local normalSoundSpeed = 1
+
+local function applySoundGlitch(strength)
+	for _, s in ipairs(getAllSounds()) do
+		if s:IsA("Sound") and s.Playing then
+			s.PlaybackSpeed = 0.3 + (strength * 0.2)  -- càng gần càng méo tiếng
+		end
+	end
+end
+
+local function resetSound()
+	for _, s in ipairs(getAllSounds()) do
+		if s:IsA("Sound") then
+			s.PlaybackSpeed = 1
+		end
+	end
+end
+
 -- Hàm tắt hiệu ứng hoàn toàn
 local function disableEffect()
 	cc.Enabled = false
 	cc.Contrast = 0
+
 	blur.Enabled = false
 	blur.Size = 0
+
+	noise.ImageTransparency = 1  -- ẩn hoàn toàn
+
+	resetSound()
 end
 
 -- Hàm cập nhật hiệu ứng theo khoảng cách
 local function updateEffect(distance)
-	if distance > 80 then
+	if distance > 90 then
 		disableEffect()
 		return
 	end
@@ -112,13 +157,20 @@ local function updateEffect(distance)
 	cc.Enabled = true
 	blur.Enabled = true
 
-	if distance <= 30 then
-		cc.Contrast = 0.9
-		blur.Size = 45
-	elseif distance <= 40 then
+	-- ẢNH NHIỄU HIỆN DẦN
+	local alpha = math.clamp(1 - (distance / 90), 0, 1)
+	noise.ImageTransparency = 1 - alpha
+
+	-- NHIỄU ÂM THANH
+	applySoundGlitch(alpha)
+
+	if distance <= 50 then
+		cc.Contrast = 1
+		blur.Size = 68
+	elseif distance <= 60 then
 		cc.Contrast = 0.7
-		blur.Size = 30
-	elseif distance <= 50 then
+		blur.Size = 40
+	elseif distance <= 90 then
 		cc.Contrast = 0.5
 		blur.Size = 20
 	else
@@ -132,7 +184,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
 	local char = player.Character
 	if not char then return end
 
-	-- 🔥 Nếu đang trốn → tắt hiệu ứng và return
+	-- 🔥 Nếu đang trốn → tắt hiệu ứng
 	if char:GetAttribute("Hiding") == true then
 		disableEffect()
 		return
