@@ -82,11 +82,13 @@ local cam = workspace.CurrentCamera
 local model = workspace:WaitForChild("Smile")
 local smiler = model:WaitForChild("SmilerNew")
 
+-- Xóa sound mặc định PlaySound nếu có
 local SOund = smiler:FindFirstChild("PlaySound")
+if SOund then
+	SOund:Destroy()
+end
 
-SOund:Destroy()
-
--- Thu thập TẤT CẢ âm thanh riêng của SmilerNew (để làm ngoại lệ)
+-- Thu thập âm thanh riêng của SmilerNew (ngoại lệ)
 local smilerSounds = {}
 for _, d in ipairs(smiler:GetDescendants()) do
 	if d:IsA("Sound") then
@@ -94,7 +96,22 @@ for _, d in ipairs(smiler:GetDescendants()) do
 	end
 end
 
--- Hiệu ứng glitch dùng ColorCorrection + Blur
+-- Lưu lại speed ORIGINAL của mọi âm thanh trong map (chỉ lưu 1 lần)
+local originalSpeed = {}
+
+local function cacheOriginalSpeeds()
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Sound") then
+			if not originalSpeed[obj] then
+				originalSpeed[obj] = obj.PlaybackSpeed
+			end
+		end
+	end
+end
+
+cacheOriginalSpeeds()
+
+-- Lighting Effects
 local Lighting = game:GetService("Lighting")
 
 local cc = Instance.new("ColorCorrectionEffect", Lighting)
@@ -106,7 +123,8 @@ local blur = Instance.new("BlurEffect", Lighting)
 blur.Size = 0
 blur.Enabled = false
 
--- 🔥 TẠO LỚP ẢNH NHIỄU MÀN HÌNH
+
+-- GUI Nhiễu
 local gui = Instance.new("ScreenGui", player.PlayerGui)
 gui.IgnoreGuiInset = true
 
@@ -116,23 +134,21 @@ noise.Position = UDim2.new(0, 0, 0, 0)
 noise.BackgroundTransparency = 1
 noise.ImageTransparency = 1
 
--- IDs ảnh glitch
-local img1 = "rbxassetid://100624884660089"
-local img2 = "rbxassetid://15705266646"
+local img1 = "rbxassetid://128327817020506"
+local img2 = "rbxassetid://132173691110215"
 
--- 🔥 LOOP CHUYỂN ĐỔI ẢNH NHIỄU MỖI 0.05 GIÂY
+-- Loop chuyển đổi ảnh 0.05s
 task.spawn(function()
 	while true do
 		noise.Image = img1
-		task.wait(0.001)
+		task.wait(0.005)
 		noise.Image = img2
-		task.wait(0.001)
+		task.wait(0.005)
 	end
 end)
 
 
-
--- Hàm kiểm tra một sound có thuộc Smiler không (ngoại lệ)
+-- Kiểm tra sound có thuộc Smiler không
 local function isSmilerSound(sound)
 	for _, v in ipairs(smilerSounds) do
 		if v == sound then
@@ -142,15 +158,13 @@ local function isSmilerSound(sound)
 	return false
 end
 
--- 🔥 LẤY TẤT CẢ ÂM THANH TRONG MAP (TRỪ SMILER)
+-- Lấy tất cả sound của map (trừ Smiler)
 local function getAllOtherSounds()
 	local list = {}
 
 	for _, obj in ipairs(workspace:GetDescendants()) do
-		if obj:IsA("Sound") then
-			if not isSmilerSound(obj) then
-				table.insert(list, obj)
-			end
+		if obj:IsA("Sound") and not isSmilerSound(obj) then
+			table.insert(list, obj)
 		end
 	end
 
@@ -158,23 +172,26 @@ local function getAllOtherSounds()
 end
 
 
--- 🎧 ÁP DỤNG NHIỄU ÂM THANH CHO TẤT CẢ SOUND (TRỪ SMILER)
-local function applySoundGlitch(strength)
+-- Áp dụng glitch cho âm thanh
+local function applySoundGlitch(alpha)
 	for _, s in ipairs(getAllOtherSounds()) do
 		if s.Playing then
-			s.PlaybackSpeed = 0.3 + (strength * 0.2) -- càng gần càng méo
+			local base = originalSpeed[s] or 1
+			s.PlaybackSpeed = base - (alpha * 0.5)
 		end
 	end
 end
 
--- 🔊 Reset lại tốc độ âm thanh bình thường
+-- Khôi phục speed gốc của âm thanh
 local function resetAllOtherSounds()
-	for _, s in ipairs(getAllOtherSounds()) do
-		s.PlaybackSpeed = 1
+	for s, spd in pairs(originalSpeed) do
+		if s and s:IsA("Sound") then
+			s.PlaybackSpeed = spd
+		end
 	end
 end
 
--- 🔊 Giữ cố định toàn bộ âm thanh Smiler = 0.3 tốc độ
+-- Giữ Smiler = 0.3 speed
 local function enforceSmilerSoundSpeed()
 	for _, s in ipairs(smilerSounds) do
 		if s then
@@ -184,7 +201,7 @@ local function enforceSmilerSoundSpeed()
 end
 
 
--- Tắt hiệu ứng hoàn toàn
+-- Disable toàn bộ hiệu ứng
 local function disableEffect()
 	cc.Enabled = false
 	cc.Contrast = 0
@@ -199,9 +216,9 @@ local function disableEffect()
 end
 
 
--- Cập nhật hiệu ứng khi đến gần
+-- Update hiệu ứng theo khoảng cách
 local function updateEffect(distance)
-	if distance > 90 then
+	if distance > 100 then
 		disableEffect()
 		return
 	end
@@ -209,11 +226,11 @@ local function updateEffect(distance)
 	cc.Enabled = true
 	blur.Enabled = true
 
-	local alpha = math.clamp(1 - (distance / 90), 0, 1)
+	local alpha = math.clamp(1 - (distance / 100), 0, 1)
 	noise.ImageTransparency = 1 - alpha
 
 	applySoundGlitch(alpha)
-	enforceSmilerSoundSpeed() -- Smiler giữ tốc độ 0.3 luôn
+	enforceSmilerSoundSpeed()
 
 	if distance <= 50 then
 		cc.Contrast = 1
@@ -221,7 +238,7 @@ local function updateEffect(distance)
 	elseif distance <= 60 then
 		cc.Contrast = 0.7
 		blur.Size = 40
-	elseif distance <= 90 then
+	elseif distance <= 80 then
 		cc.Contrast = 0.5
 		blur.Size = 20
 	else
@@ -230,19 +247,20 @@ local function updateEffect(distance)
 	end
 end
 
+
 -- Loop kiểm tra khoảng cách
 game:GetService("RunService").RenderStepped:Connect(function()
 	local char = player.Character
 	if not char then return end
 
-	-- 🔥 Nếu đang trốn → tắt sạch hiệu ứng và âm thanh
+	-- Nếu trốn → tắt hoàn toàn
 	if char:GetAttribute("Hiding") == true then
 		disableEffect()
 		return
 	end
 
 	local root = char:FindFirstChild("HumanoidRootPart")
-	if not root or not smiler then return end
+	if not root then return end
 
 	local distance = (root.Position - smiler.Position).Magnitude
 	updateEffect(distance)
