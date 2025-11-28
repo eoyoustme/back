@@ -82,6 +82,10 @@ local cam = workspace.CurrentCamera
 local model = workspace:WaitForChild("Smile")
 local smiler = model:WaitForChild("SmilerNew")
 
+local SOund = smiler:FindFirstChild("PlaySound")
+
+SOund:Destroy()
+
 -- Thu thập TẤT CẢ âm thanh riêng của SmilerNew (để làm ngoại lệ)
 local smilerSounds = {}
 for _, d in ipairs(smiler:GetDescendants()) do
