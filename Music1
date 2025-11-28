@@ -11,5 +11,4 @@ end
 local Jumpscare = GetGitSound("https://github.com/nervehammer1/throwawaystuff/raw/refs/heads/main/NightmareAmbient.mp3", "NightmareModeAmbient")
 Jumpscare.Parent = workspace
 Jumpscare.Volume = 1
-Jumpscare.Looped = true
 Jumpscare.PlaybackSpeed = 1
