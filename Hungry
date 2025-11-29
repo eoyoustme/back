@@ -1,0 +1,35 @@
+local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+local soundId = 9125712561
+local soundDuration = 14  -- thời gian chờ sau khi tiếng xong
+
+local canOpenDoor = false -- khóa cửa tạm thời
+
+-- Tạo âm thanh
+local sound = Instance.new("Sound")
+sound.SoundId = "rbxassetid://" .. soundId
+sound.Volume = 6
+sound.PlayOnRemove = false
+sound.Parent = workspace
+sound:Play()
+
+-- Khi âm thanh đang phát -> CẤM mở cửa
+canOpenDoor = false
+
+-- Chờ âm thanh chạy xong + 14 giây
+task.spawn(function()
+    sound.Ended:Wait()
+    task.wait(soundDuration)
+    canOpenDoor = true
+end)
+
+-- Theo dõi khi player đổi phòng (tức là mở cửa)
+RS.GameData.LatestRoom.Changed:Connect(function()
+    if not canOpenDoor then
+        humanoid.Health = 0 -- giết người chơi nếu cố mở cửa khi đang khóa
+    end
+end)
