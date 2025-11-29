@@ -1,0 +1,335 @@
+---====== Load spawner ======---
+
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+
+---====== Create entity ======---
+
+local entity = spawner.Create({
+	Entity = {
+		Name = "Smile",
+		Asset = "rbxassetid://120469499916977",
+		HeightOffset = 0
+	},
+	Lights = {
+		Flicker = {
+			Enabled = true,
+			Duration = 1
+		},
+		Shatter = true,
+		Repair = false
+	},
+	Earthquake = {
+		Enabled = true
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 100,
+		Values = {1.5, 20, 0.1, 1} -- Magnitude, Roughness, FadeIn, FadeOut
+	},
+	Movement = {
+		Speed = 100,
+		Delay = 8,
+		Reversed = true
+	},
+	Rebounding = {
+		Enabled = false,
+		Type = "Ambush", -- "Blitz"
+		Min = 1,
+		Max = 1,
+		Delay = 2
+	},
+	Damage = {
+		Enabled = true,
+		Range = 40,
+		Amount = 125
+	},
+	Crucifixion = {
+		Enabled = true,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding", -- "Curious"
+		Hints = {"You die to SMile", "If he spawn will charge to red light", "carefully"},
+		Cause = ""
+	}
+})
+
+---====== Debug entity ======---
+
+entity:SetCallback("OnSpawned", function()
+    print("Entity has spawned")
+  local sound = Instance.new("Sound", workspace)
+    sound.SoundId = "rbxassetid://6891548543"
+    sound.Volume = 10
+    sound:Play()
+
+game.Lighting.MainColorCorrection.TintColor = Color3.fromRGB(255, 255, 255)
+game.Lighting.MainColorCorrection.Contrast = 1
+local tween = game:GetService("TweenService")
+tween:Create(game.Lighting.MainColorCorrection, TweenInfo.new(2.5), {Contrast = 0}):Play()
+local TweenService = game:GetService("TweenService")
+local TW = TweenService:Create(game.Lighting.MainColorCorrection, TweenInfo.new(5),{TintColor = Color3.fromRGB(255, 0, 0)})
+TW:Play()
+wait(0.1)
+
+local player = game.Players.LocalPlayer
+local cam = workspace.CurrentCamera
+
+-- Tìm Model và Part
+local model = workspace:WaitForChild("Smile")
+local smiler = model:WaitForChild("SmilerNew")
+
+-- Xóa sound mặc định PlaySound nếu có
+local SOund = smiler:FindFirstChild("PlaySound")
+if SOund then
+	SOund:Destroy()
+end
+
+-- Thu thập âm thanh riêng của SmilerNew (ngoại lệ)
+local smilerSounds = {}
+for _, d in ipairs(smiler:GetDescendants()) do
+	if d:IsA("Sound") then
+		table.insert(smilerSounds, d)
+	end
+end
+
+-- Lưu lại speed ORIGINAL của mọi âm thanh trong map (chỉ lưu 1 lần)
+local originalSpeed = {}
+
+local function cacheOriginalSpeeds()
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Sound") then
+			if not originalSpeed[obj] then
+				originalSpeed[obj] = obj.PlaybackSpeed
+			end
+		end
+	end
+end
+
+cacheOriginalSpeeds()
+
+-- Lighting Effects
+local Lighting = game:GetService("Lighting")
+
+local cc = Instance.new("ColorCorrectionEffect", Lighting)
+cc.Enabled = false
+cc.Contrast = 0
+cc.Saturation = 0
+
+local blur = Instance.new("BlurEffect", Lighting)
+blur.Size = 0
+blur.Enabled = false
+
+
+-- GUI Nhiễu
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.IgnoreGuiInset = true
+
+local noise = Instance.new("ImageLabel", gui)
+noise.Size = UDim2.new(1, 0, 1, 0)
+noise.Position = UDim2.new(0, 0, 0, 0)
+noise.BackgroundTransparency = 1
+noise.ImageTransparency = 1
+
+local img1 = "rbxassetid://128327817020506"
+local img2 = "rbxassetid://132173691110215"
+
+-- Loop chuyển đổi ảnh 0.05s
+task.spawn(function()
+	while true do
+		noise.Image = img1
+		task.wait(0.005)
+		noise.Image = img2
+		task.wait(0.005)
+	end
+end)
+
+
+-- Kiểm tra sound có thuộc Smiler không
+local function isSmilerSound(sound)
+	for _, v in ipairs(smilerSounds) do
+		if v == sound then
+			return true
+		end
+	end
+	return false
+end
+
+-- Lấy tất cả sound của map (trừ Smiler)
+local function getAllOtherSounds()
+	local list = {}
+
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Sound") and not isSmilerSound(obj) then
+			table.insert(list, obj)
+		end
+	end
+
+	return list
+end
+
+
+-- Áp dụng glitch cho âm thanh
+local function applySoundGlitch(alpha)
+	for _, s in ipairs(getAllOtherSounds()) do
+		if s.Playing then
+			local base = originalSpeed[s] or 1
+			s.PlaybackSpeed = base - (alpha * 0.5)
+		end
+	end
+end
+
+-- Khôi phục speed gốc của âm thanh
+local function resetAllOtherSounds()
+	for s, spd in pairs(originalSpeed) do
+		if s and s:IsA("Sound") then
+			s.PlaybackSpeed = spd
+		end
+	end
+end
+
+-- Giữ Smiler = 0.3 speed
+local function enforceSmilerSoundSpeed()
+	for _, s in ipairs(smilerSounds) do
+		if s then
+			s.PlaybackSpeed = 0.3
+		end
+	end
+end
+
+
+-- Disable toàn bộ hiệu ứng
+local function disableEffect()
+	cc.Enabled = false
+	cc.Contrast = 0
+
+	blur.Enabled = false
+	blur.Size = 0
+
+	noise.ImageTransparency = 1
+
+	resetAllOtherSounds()
+	enforceSmilerSoundSpeed()
+end
+
+
+-- Update hiệu ứng theo khoảng cách
+local function updateEffect(distance)
+	if distance > 100 then
+		disableEffect()
+		return
+	end
+
+	cc.Enabled = true
+	blur.Enabled = true
+
+	local alpha = math.clamp(1 - (distance / 100), 0, 1)
+	noise.ImageTransparency = 1 - alpha
+
+	applySoundGlitch(alpha)
+	enforceSmilerSoundSpeed()
+
+	if distance <= 50 then
+		cc.Contrast = 1
+		blur.Size = 68
+	elseif distance <= 60 then
+		cc.Contrast = 0.7
+		blur.Size = 40
+	elseif distance <= 80 then
+		cc.Contrast = 0.5
+		blur.Size = 20
+	else
+		cc.Contrast = 0.3
+		blur.Size = 12
+	end
+end
+
+
+-- Loop kiểm tra khoảng cách
+game:GetService("RunService").RenderStepped:Connect(function()
+	local char = player.Character
+	if not char then return end
+
+	-- Nếu trốn → tắt hoàn toàn
+	if char:GetAttribute("Hiding") == true then
+		disableEffect()
+		return
+	end
+
+	local root = char:FindFirstChild("HumanoidRootPart")
+	if not root then return end
+
+	local distance = (root.Position - smiler.Position).Magnitude
+	updateEffect(distance)
+end)
+
+end)
+
+entity:SetCallback("OnStartMoving", function()
+    print("Entity has started moving")
+end)
+
+entity:SetCallback("OnEnterRoom", function(room, firstTime)
+    if firstTime == true then
+        print("Entity has entered room: ".. room.Name.. " for the first time")
+    else
+        print("Entity has entered room: ".. room.Name.. " again")
+    end
+end)
+
+entity:SetCallback("OnLookAt", function(lineOfSight)
+	if lineOfSight == true then
+		print("Player is looking at entity")
+	else
+		print("Player view is obstructed by something")
+	end
+end)
+
+entity:SetCallback("OnRebounding", function(startOfRebound)
+    if startOfRebound == true then
+        print("Entity has started rebounding")
+	else
+        print("Entity has finished rebounding")
+	end
+end)
+
+entity:SetCallback("OnDespawning", function()
+    print("Entity is despawning")
+wait(3)
+game.Lighting.MainColorCorrection.TintColor = Color3.fromRGB(255, 0, 0)
+game.Lighting.MainColorCorrection.Contrast = 0.01
+local tween = game:GetService("TweenService")
+tween:Create(game.Lighting.MainColorCorrection, TweenInfo.new(2.5), {Contrast = 0}):Play()
+local TweenService = game:GetService("TweenService")
+local TW = TweenService:Create(game.Lighting.MainColorCorrection, TweenInfo.new(5),{TintColor = Color3.fromRGB(255, 255, 255)})
+TW:Play()
+end)
+
+entity:SetCallback("OnDespawned", function()
+    print("Entity has despawned")
+end)
+
+entity:SetCallback("OnDamagePlayer", function(newHealth)
+	if newHealth == 0 then
+		print("Entity has killed the player")
+	else
+		print("Entity has damaged the player")
+	end
+end)
+
+--[[
+
+DEVELOPER NOTE:
+By overwriting 'CrucifixionOverwrite' the default crucifixion callback will be replaced with your custom callback.
+
+entity:SetCallback("CrucifixionOverwrite", function()
+    print("Custom crucifixion callback")
+end)
+
+]]--
+
+---====== Run entity ======---
+
+entity:Run()
