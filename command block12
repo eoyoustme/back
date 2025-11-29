@@ -9,6 +9,23 @@ omg.Parent = room
 local eyes = game:GetObjects("rbxassetid://135459928966068")[1]
 eyes.Parent = omg
 
+--== ĐẢM BẢO EYES CÓ PRIMARYPART ==--
+if not eyes.PrimaryPart then
+    -- Tự động set PrimaryPart bằng BasePart đầu tiên
+    for _, v in ipairs(eyes:GetChildren()) do
+        if v:IsA("BasePart") then
+            eyes.PrimaryPart = v
+            break
+        end
+    end
+end
+
+if not eyes.PrimaryPart then
+    warn("Eyes không có BasePart!")
+    return
+end
+
+
 --== TÌM GIỮA PHÒNG ==
 local centerCFrame
 
@@ -17,55 +34,46 @@ if room:FindFirstChild("PathfindNodes") then
     table.sort(nodes, function(a,b) return tonumber(a.Name) < tonumber(b.Name) end)
 
     local midIndex = math.floor(#nodes / 2)
-    if midIndex < 1 then midIndex = 1 end
-
     centerCFrame = nodes[midIndex].CFrame
 else
-    local mainPart = room:FindFirstChild(room.Name)
-    if mainPart then
-        centerCFrame = mainPart.CFrame
-    else
-        warn("Không tìm được vị trí giữa phòng!")
-        return
-    end
+    centerCFrame = room:FindFirstChild(room.Name).CFrame
 end
 
 --== ĐẶT EYES Ở GIỮA PHÒNG ==
 eyes:PivotTo(centerCFrame + Vector3.new(0, 5, 0))
 
 
---== FIX PROXIMITY PROMPT KHÔNG HOẠT ĐỘNG ==--
-local smoothBlockModel = omg:FindFirstChild("Smooth Block Model")
+--== TÌM PART CHO PROMPT (KHÔNG BAO GIỜ DÙNG MODEL) ==--
+local smoothModel = omg:FindFirstChild("Smooth Block Model")
+local partForPrompt
 
-local targetPart
-
--- TÌM PART BÊN TRONG MODEL
-if smoothBlockModel then
-    for _, v in ipairs(smoothBlockModel:GetChildren()) do
+if smoothModel then
+    for _, v in ipairs(smoothModel:GetChildren()) do
         if v:IsA("BasePart") then
-            targetPart = v
+            partForPrompt = v
             break
         end
     end
 end
 
--- NẾU KHÔNG CÓ → fallback
-if not targetPart then
-    targetPart = eyes.PrimaryPart
+-- fallback dùng primary part của eyes
+if not partForPrompt then
+    partForPrompt = eyes.PrimaryPart
 end
 
---== TẠO PROMPT ĐÚNG CÁCH ==--
+
+--== TẠO PROMPT (Giờ chắc chắn gắn vào BasePart) ==--
 local prompt = Instance.new("ProximityPrompt")
 prompt.ActionText = "Collect"
 prompt.ObjectText = "Strange Device"
 prompt.HoldDuration = 4
 prompt.RequiresLineOfSight = false
-prompt.Parent = targetPart  -- ⚠ MUST BE A PART
+prompt.MaxActivationDistance = 12
+prompt.Parent = partForPrompt
 
 
---== KHI HOÀN THÀNH PROMPT ==--
+--== SỰ KIỆN KHI NHẶT XONG ==--
 prompt.Triggered:Connect(function(player)
-
     local pick = math.random(1, 2)
 
     if pick == 1 then
@@ -80,4 +88,3 @@ prompt.Triggered:Connect(function(player)
 
     omg:Destroy()
 end)
-
