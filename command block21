@@ -8,7 +8,7 @@ local player = Players.LocalPlayer
 local function spawnDreadClock(room)
     
     -- 11% tỉ lệ xuất hiện
-    if math.random(1, 100) > 70 then
+    if math.random(1, 100) > 11 then
         return -- Không spawn
     end
 
@@ -64,41 +64,46 @@ local function spawnDreadClock(room)
     prompt.Parent = mainPart
 
     --== SỰ KIỆN KHI NHẶT ==--
-prompt.Triggered:Connect(function(plr)
-    local pick = math.random(1,5)
+    prompt.Triggered:Connect(function(plr)
 
-    task.spawn(function()  -- đảm bảo async không block destroy
-        if pick == 1 then
-            loadstring(game:HttpGet("...Crucifix"))()
-            require(plr.PlayerGui.MainUI.Initiator.Main_Game)
-                .caption("Command block has granted you a Crucifix!", true)
+        -- Destroy model ngay lập tức để tránh entity xấu block
+        omg:Destroy()
 
-        elseif pick == 2 then
-            loadstring(game:HttpGet("...Flashlight"))()
-            require(plr.PlayerGui.MainUI.Initiator.Main_Game)
-                .caption("Command block has granted you a Flashlight!", true)
+        local pick = math.random(1, 5)
 
-        elseif pick == 3 then
-            loadstring(game:HttpGet("...Smile bad luck"))()
-            require(plr.PlayerGui.MainUI.Initiator.Main_Game)
-                .caption("Oh no! You have bad luck, an entity has spawned", true)
+        task.spawn(function()  -- async để load entity xấu không ảnh hưởng model destroy
+            if pick == 1 then
+                -- Crucifix
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Crucifix"))()
+                require(plr.PlayerGui.MainUI.Initiator.Main_Game)
+                    .caption("Command block has granted you a Crucifix!", true)
 
-        elseif pick == 4 then
-            loadstring(game:HttpGet("...Angel"))()
-            require(plr.PlayerGui.MainUI.Initiator.Main_Game)
-                .caption("Oh no! You have bad luck, an entity has spawned", true)
+            elseif pick == 2 then
+                -- Flashlight
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Monoxide/refs/heads/main/Flashlight"))()
+                require(plr.PlayerGui.MainUI.Initiator.Main_Game)
+                    .caption("Command block has granted you a Flashlight!", true)
 
-        elseif pick == 5 then
-            loadstring(game:HttpGet("...Depthter bad luck"))()
-            require(plr.PlayerGui.MainUI.Initiator.Main_Game)
-                .caption("Oh no! You have bad luck, an entity has spawned", true)
-        end
+            elseif pick == 3 then
+                -- Entity xấu 1
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Smile%20bad%20luck"))()
+                require(plr.PlayerGui.MainUI.Initiator.Main_Game)
+                    .caption("Oh no! You have bad luck, an entity has spawned", true)
+
+            elseif pick == 4 then
+                -- Entity xấu 2
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Angel"))()
+                require(plr.PlayerGui.MainUI.Initiator.Main_Game)
+                    .caption("Oh no! You have bad luck, an entity has spawned", true)
+
+            elseif pick == 5 then
+                -- Entity xấu 3
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/ohh/refs/heads/main/Depthter%20bad%20luck"))()
+                require(plr.PlayerGui.MainUI.Initiator.Main_Game)
+                    .caption("Oh no! You have bad luck, an entity has spawned", true)
+            end
+        end)
     end)
-
-    -- Destroy model ngay sau khi nhấn prompt
-    omg:Destroy()
-end)
-
 end
 
 --====================================================
@@ -114,4 +119,3 @@ RS.GameData.LatestRoom.Changed:Connect(function()
         spawnDreadClock(room)  -- gọi spawn theo tỉ lệ 11%
     end
 end)
-
