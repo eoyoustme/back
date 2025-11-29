@@ -1,76 +1,110 @@
---== TẠO MODEL DREADCLOCK ==--
-local room = workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]
+local RS = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
-local omg = Instance.new("Model")
-omg.Name = "DreadClock"
-omg.Parent = room
+--=========================================
+--      HÀM SPAWN DREADCLOCK 11%
+--=========================================
+local function spawnDreadClock(room)
+    
+    -- 11% tỉ lệ xuất hiện
+    if math.random(1, 100) > 11 then
+        return -- Không spawn
+    end
 
---== LẤY MODEL EYES ==--
-local eyes = game:GetObjects("rbxassetid://114894440433899")[1]
-eyes.Parent = omg
+    --== TẠO MODEL DREADCLOCK ==--
+    local omg = Instance.new("Model")
+    omg.Name = "DreadClock"
+    omg.Parent = room
 
---== ĐẢM BẢO CÓ PRIMARYPART ==--
-if not eyes.PrimaryPart then
-    for _, v in ipairs(eyes:GetChildren()) do
-        if v:IsA("BasePart") then
-            eyes.PrimaryPart = v
-            break
+    --== LẤY MODEL EYES ==--
+    local eyes = game:GetObjects("rbxassetid://114894440433899")[1]
+    eyes.Parent = omg
+
+    --== ĐẢM BẢO PRIMARYPART ==--
+    if not eyes.PrimaryPart then
+        for _, v in ipairs(eyes:GetChildren()) do
+            if v:IsA("BasePart") then
+                eyes.PrimaryPart = v
+                break
+            end
         end
     end
-end
-local mainPart = eyes.PrimaryPart
+    local mainPart = eyes.PrimaryPart
 
+    --=====================================
+    --        TÌM GIỮA PHÒNG
+    --=====================================
+    local centerCFrame
+    local nodes = room:FindFirstChild("PathfindNodes")
 
---== TÌM GIỮA PHÒNG ==--
-local centerCFrame
-local nodes = room:FindFirstChild("PathfindNodes")
-
-if nodes then
-    local children = nodes:GetChildren()
-    table.sort(children, function(a,b) return tonumber(a.Name) < tonumber(b.Name) end)
-    centerCFrame = children[math.floor(#children/2)].CFrame
-else
-    centerCFrame = room[room.Name].CFrame
-end
-
-eyes:PivotTo(centerCFrame + Vector3.new(0, 5, 0))
-
-
---== TẠO PROXIMITY PROMPT CHUẨN DOORS ==--
-local prompt = Instance.new("ProximityPrompt")
-prompt.ObjectText = "Strange Device"
-prompt.ActionText = "Collect"
-prompt.HoldDuration = 4
-
-prompt.RequiresLineOfSight = false
-prompt.MaxActivationDistance = 20  -- khoảng cách chuẩn Doors
-
--- ⭐ Quan trọng: dùng UI riêng của Doors, không phải Icon mặc định
-prompt.Style = Enum.ProximityPromptStyle.Custom
-
--- Cho Doors biết đây là nút E giống game gốc
-prompt.KeyboardKeyCode = Enum.KeyCode.E
-prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
-
--- Đặt Prompt vào PART
-prompt.Parent = mainPart
-
-
---== KHI NHẶT XONG ==--
-prompt.Triggered:Connect(function(player)
-
-    local pick = math.random(1, 2)
-
-    if pick == 1 then
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Crucifix"))()
-        require(player.PlayerGui.MainUI.Initiator.Main_Game)
-        .caption("Command block is give you crucifix", true)
-
+    if nodes then
+        local children = nodes:GetChildren()
+        table.sort(children, function(a,b) return tonumber(a.Name) < tonumber(b.Name) end)
+        centerCFrame = children[math.floor(#children/2)].CFrame
     else
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Monoxide/refs/heads/main/Flashlight"))()
-        require(player.PlayerGui.MainUI.Initiator.Main_Game)
-        .caption("command block is give you flashlight", true)
+        centerCFrame = room:FindFirstChild(room.Name).CFrame
     end
 
-    omg:Destroy()
+    eyes:PivotTo(centerCFrame + Vector3.new(0, 5, 0))
+
+    ------------------------------------------------
+    --          PROXIMITY PROMPT DOORS
+    ------------------------------------------------
+    local prompt = Instance.new("ProximityPrompt")
+    prompt.ObjectText = "Strange Device"
+    prompt.ActionText = "Collect"
+    prompt.HoldDuration = 4
+    prompt.Style = Enum.ProximityPromptStyle.Custom
+    prompt.RequiresLineOfSight = false
+    prompt.MaxActivationDistance = 20
+
+    prompt.KeyboardKeyCode = Enum.KeyCode.E
+    prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
+    prompt.Parent = mainPart
+
+    --== SỰ KIỆN KHI NHẶT ==--
+    prompt.Triggered:Connect(function(plr)
+
+        local pick = math.random(1, 3)
+
+        if pick == 1 then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Crucifix"))()
+            require(plr.PlayerGui.MainUI.Initiator.Main_Game)
+            .caption("Command block has granted you a Crucifix!", true)
+
+        else
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Monoxide/refs/heads/main/Flashlight"))()
+            require(plr.PlayerGui.MainUI.Initiator.Main_Game)
+            .caption("Command block has granted you a Flashlight!", true)
+        else
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Smile%20bad%20luck"))()
+            require(plr.PlayerGui.MainUI.Initiator.Main_Game)
+            .caption("oh no you have bad luck a entity has spawn", true)
+       else
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Angel"))()
+            require(plr.PlayerGui.MainUI.Initiator.Main_Game)
+            .caption("oh no you have bad luck a entity has spawn", true)
+       else
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/ohh/refs/heads/main/Depthter%20bad%20luck"))()
+            require(plr.PlayerGui.MainUI.Initiator.Main_Game)
+            .caption("oh no you have bad luck a entity has spawn", true)
+        end
+
+        omg:Destroy()
+    end)
+end
+
+--====================================================
+--     LẶP LẠI MỖI LẦN QUA PHÒNG MỚI (AUTO)
+--====================================================
+RS.GameData.LatestRoom.Changed:Connect(function()
+    task.wait(0.25)
+
+    local roomNumber = RS.GameData.LatestRoom.Value
+    local room = workspace.CurrentRooms:FindFirstChild(roomNumber)
+
+    if room then
+        spawnDreadClock(room)  -- gọi spawn theo tỉ lệ 11%
+    end
 end)
