@@ -1,41 +1,26 @@
-local Players = game:GetService("Players")
-local RS = game:GetService("ReplicatedStorage")
-local player = Players.LocalPlayer
-
-local soundId = 9125712561
-local soundDuration = 14
-
--- Lấy cửa hiện tại
-local function getCurrentDoor()
-    local room = workspace.CurrentRooms[RS.GameData.LatestRoom.Value]
-    if room and room:FindFirstChild("Door") then
-        return room.Door
-    end
-    return nil
-end
-
-local door = getCurrentDoor()
-if not door then warn("Không tìm thấy cửa!") return end
-
--- Chặn mở cửa
-local prompt = door:FindFirstChild("Door"):FindFirstChildWhichIsA("ProximityPrompt")
-if prompt then
-    prompt.Enabled = false
-end
-
--- PHÁT ÂM THANH
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Guiding Light: PLS DON'T OPEN THE DOOR YOU WILL DIE", true)
 local sound = Instance.new("Sound")
-sound.SoundId = "rbxassetid://" .. soundId
+sound.Parent = game.Workspace
+sound.Name = "s"
+sound.SoundId = "rbxassetid://9125712561"
 sound.Volume = 6
-sound.Parent = workspace
+sound.PlaybackSpeed = 1
+sound.Looped = false
 sound:Play()
 
--- Khi âm thanh xong + 14s → cho mở cửa
-task.spawn(function()
-    sound.Ended:Wait()
-    task.wait(soundDuration)
-
-    if prompt then
-        prompt.Enabled = true
-    end
+game.Workspace.CurrentRooms:GetChildren()[#game.Workspace.CurrentRooms:GetChildren() - 1]:SetAttribute("Ambient",Color3.fromRGB(100, 0, 0))
+local a = game.ReplicatedStorage.GameData.LatestRoom.Changed:Connect(function()
+game.Players.LocalPlayer.Character.Humanoid:TakeDamage(1000)
+game:GetService("ReplicatedStorage").GameStats["Player_".. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "Hunger [Opened Door]"
 end)
+wait(14)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Guiding Light: you cna open the door now", true)
+
+local sound = Instance.new("Sound")
+sound.Parent = game.Workspace
+sound.Name = "s"
+sound.SoundId = "rbxassetid://9125713295"
+sound.Volume = 6
+sound.PlaybackSpeed = 1
+sound.Looped = false
+sound:Play()
