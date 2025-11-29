@@ -8,8 +8,6 @@ omg.Parent = room
 --== LẤY MODEL EYES ==--
 local eyes = game:GetObjects("rbxassetid://135459928966068")[1]
 eyes.Parent = omg
-eyes.PrimaryPart.Anchored = true
-
 
 --== TÌM GIỮA PHÒNG ==
 local centerCFrame
