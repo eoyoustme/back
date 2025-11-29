@@ -6,7 +6,7 @@ omg.Name = "DreadClock"
 omg.Parent = room
 
 --== LẤY MODEL EYES ==--
-local eyes = game:GetObjects("rbxassetid://135459928966068")[1]
+local eyes = game:GetObjects("rbxassetid://114894440433899")[1]
 eyes.Parent = omg
 
 --== ĐẢM BẢO CÓ PRIMARYPART ==--
