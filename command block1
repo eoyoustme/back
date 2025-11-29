@@ -12,7 +12,6 @@ eyes.Parent = omg
 --== TÌM GIỮA PHÒNG ==
 local centerCFrame
 
--- Nếu phòng có PathfindNodes → lấy node ở giữa
 if room:FindFirstChild("PathfindNodes") then
     local nodes = room.PathfindNodes:GetChildren()
     table.sort(nodes, function(a,b) return tonumber(a.Name) < tonumber(b.Name) end)
@@ -22,7 +21,6 @@ if room:FindFirstChild("PathfindNodes") then
 
     centerCFrame = nodes[midIndex].CFrame
 else
-    -- Không có pathnodes → lấy part chính của phòng
     local mainPart = room:FindFirstChild(room.Name)
     if mainPart then
         centerCFrame = mainPart.CFrame
@@ -36,31 +34,45 @@ end
 eyes:PivotTo(centerCFrame + Vector3.new(0, 5, 0))
 
 
---== THÊM PROXIMITY PROMPT ==--
-local smoothBlock = omg:FindFirstChild("Smooth Block Model") or eyes.PrimaryPart
+--== FIX PROXIMITY PROMPT KHÔNG HOẠT ĐỘNG ==--
+local smoothBlockModel = omg:FindFirstChild("Smooth Block Model")
 
+local targetPart
+
+-- TÌM PART BÊN TRONG MODEL
+if smoothBlockModel then
+    for _, v in ipairs(smoothBlockModel:GetChildren()) do
+        if v:IsA("BasePart") then
+            targetPart = v
+            break
+        end
+    end
+end
+
+-- NẾU KHÔNG CÓ → fallback
+if not targetPart then
+    targetPart = eyes.PrimaryPart
+end
+
+--== TẠO PROMPT ĐÚNG CÁCH ==--
 local prompt = Instance.new("ProximityPrompt")
 prompt.ActionText = "Collect"
 prompt.ObjectText = "Strange Device"
 prompt.HoldDuration = 4
 prompt.RequiresLineOfSight = false
-prompt.Parent = smoothBlock
+prompt.Parent = targetPart  -- ⚠ MUST BE A PART
 
 
---== XỬ LÝ KHI HOÀN THÀNH PROXIMITY PROMPT ==--
+--== KHI HOÀN THÀNH PROMPT ==--
 prompt.Triggered:Connect(function(player)
 
-    -- Random script
     local pick = math.random(1, 2)
 
     if pick == 1 then
-        -- CRUCIFIX
         loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Crucifix"))()
         require(player.PlayerGui.MainUI.Initiator.Main_Game)
             .caption("Command block is give you crucifix", true)
-
     else
-        -- FLASHLIGHT
         loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Monoxide/refs/heads/main/Flashlight"))()
         require(player.PlayerGui.MainUI.Initiator.Main_Game)
             .caption("command block is give you flashlight", true)
@@ -68,3 +80,4 @@ prompt.Triggered:Connect(function(player)
 
     omg:Destroy()
 end)
+
