@@ -1,0 +1,76 @@
+--== TẠO MODEL DREADCLOCK ==--
+local room = workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]
+
+local omg = Instance.new("Model")
+omg.Name = "DreadClock"
+omg.Parent = room
+
+--== LẤY MODEL EYES ==--
+local eyes = game:GetObjects("rbxassetid://135459928966068")[1]
+eyes.Parent = omg
+
+--== ĐẢM BẢO CÓ PRIMARYPART ==--
+if not eyes.PrimaryPart then
+    for _, v in ipairs(eyes:GetChildren()) do
+        if v:IsA("BasePart") then
+            eyes.PrimaryPart = v
+            break
+        end
+    end
+end
+local mainPart = eyes.PrimaryPart
+
+
+--== TÌM GIỮA PHÒNG ==--
+local centerCFrame
+local nodes = room:FindFirstChild("PathfindNodes")
+
+if nodes then
+    local children = nodes:GetChildren()
+    table.sort(children, function(a,b) return tonumber(a.Name) < tonumber(b.Name) end)
+    centerCFrame = children[math.floor(#children/2)].CFrame
+else
+    centerCFrame = room[room.Name].CFrame
+end
+
+eyes:PivotTo(centerCFrame + Vector3.new(0, 5, 0))
+
+
+--== TẠO PROXIMITY PROMPT CHUẨN DOORS ==--
+local prompt = Instance.new("ProximityPrompt")
+prompt.ObjectText = "Strange Device"
+prompt.ActionText = "Collect"
+prompt.HoldDuration = 4
+
+prompt.RequiresLineOfSight = false
+prompt.MaxActivationDistance = 20  -- khoảng cách chuẩn Doors
+
+-- ⭐ Quan trọng: dùng UI riêng của Doors, không phải Icon mặc định
+prompt.Style = Enum.ProximityPromptStyle.Custom
+
+-- Cho Doors biết đây là nút E giống game gốc
+prompt.KeyboardKeyCode = Enum.KeyCode.E
+prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
+
+-- Đặt Prompt vào PART
+prompt.Parent = mainPart
+
+
+--== KHI NHẶT XONG ==--
+prompt.Triggered:Connect(function(player)
+
+    local pick = math.random(1, 2)
+
+    if pick == 1 then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Crucifix"))()
+        require(player.PlayerGui.MainUI.Initiator.Main_Game)
+        .caption("Command block is give you crucifix", true)
+
+    else
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Monoxide/refs/heads/main/Flashlight"))()
+        require(player.PlayerGui.MainUI.Initiator.Main_Game)
+        .caption("command block is give you flashlight", true)
+    end
+
+    omg:Destroy()
+end)
