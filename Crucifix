@@ -1,0 +1,8 @@
+--[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+_G.Uses = 1
+_G.Range = 50
+_G.OnAnything = false
+_G.Fail = false
+loadstring(game:HttpGet('https://raw.githubusercontent.com/PenguinManiack/Crucifix/main/Crucifix.lua'))() --no deivid-- --execute this instead--
