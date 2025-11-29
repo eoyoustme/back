@@ -5,37 +5,37 @@ local omg = Instance.new("Model")
 omg.Name = "DreadClock"
 omg.Parent = room
 
-
---== LẤY MODEL TABLE TRONG PHÒNG ==--
-local tableModel = room:FindFirstChild("Table")
-if not tableModel then
-    warn("Không tìm thấy Table trong phòng!")
-    return
-end
-
--- Lấy 3 MeshPart trong Table để random spawn
-local meshParts = {}
-for _, v in ipairs(tableModel:GetChildren()) do
-    if v:IsA("MeshPart") then
-        table.insert(meshParts, v)
-    end
-end
-
-if #meshParts == 0 then
-    warn("Không có MeshPart nào trong Table!")
-    return
-end
-
-
 --== LẤY MODEL EYES ==--
 local eyes = game:GetObjects("rbxassetid://135459928966068")[1]
 eyes.Parent = omg
 eyes.PrimaryPart.Anchored = true
 
 
---== RANDOM 1 MESH PART ĐỂ ĐẶT EYES LÊN ==--
-local choosenPart = meshParts[math.random(1, #meshParts)]
-eyes:PivotTo(choosenPart.CFrame + Vector3.new(0, 2, 0))
+--== TÌM GIỮA PHÒNG ==
+local centerCFrame
+
+-- Nếu phòng có PathfindNodes → lấy node ở giữa
+if room:FindFirstChild("PathfindNodes") then
+    local nodes = room.PathfindNodes:GetChildren()
+    table.sort(nodes, function(a,b) return tonumber(a.Name) < tonumber(b.Name) end)
+
+    local midIndex = math.floor(#nodes / 2)
+    if midIndex < 1 then midIndex = 1 end
+
+    centerCFrame = nodes[midIndex].CFrame
+else
+    -- Không có pathnodes → lấy part chính của phòng
+    local mainPart = room:FindFirstChild(room.Name)
+    if mainPart then
+        centerCFrame = mainPart.CFrame
+    else
+        warn("Không tìm được vị trí giữa phòng!")
+        return
+    end
+end
+
+--== ĐẶT EYES Ở GIỮA PHÒNG ==
+eyes:PivotTo(centerCFrame + Vector3.new(0, 5, 0))
 
 
 --== THÊM PROXIMITY PROMPT ==--
@@ -49,27 +49,24 @@ prompt.RequiresLineOfSight = false
 prompt.Parent = smoothBlock
 
 
---== HÀNH ĐỘNG KHI HOÀN THÀNH PROXIMITY PROMPT ==--
+--== XỬ LÝ KHI HOÀN THÀNH PROXIMITY PROMPT ==--
 prompt.Triggered:Connect(function(player)
-    
-    -- Random 1 trong 2 script
+
+    -- Random script
     local pick = math.random(1, 2)
 
     if pick == 1 then
-        -- CRUCIFIX SCRIPT
+        -- CRUCIFIX
         loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Crucifix"))()
-
         require(player.PlayerGui.MainUI.Initiator.Main_Game)
             .caption("Command block is give you crucifix", true)
 
-    elseif pick == 2 then
-        -- FLASHLIGHT SCRIPT
+    else
+        -- FLASHLIGHT
         loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Monoxide/refs/heads/main/Flashlight"))()
-
         require(player.PlayerGui.MainUI.Initiator.Main_Game)
             .caption("command block is give you flashlight", true)
     end
 
-    -- XÓA MODEL
     omg:Destroy()
 end)
