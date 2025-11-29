@@ -1,0 +1,75 @@
+--== TẠO MODEL DREADCLOCK ==--
+local room = workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]
+
+local omg = Instance.new("Model")
+omg.Name = "DreadClock"
+omg.Parent = room
+
+
+--== LẤY MODEL TABLE TRONG PHÒNG ==--
+local tableModel = room:FindFirstChild("Table")
+if not tableModel then
+    warn("Không tìm thấy Table trong phòng!")
+    return
+end
+
+-- Lấy 3 MeshPart trong Table để random spawn
+local meshParts = {}
+for _, v in ipairs(tableModel:GetChildren()) do
+    if v:IsA("MeshPart") then
+        table.insert(meshParts, v)
+    end
+end
+
+if #meshParts == 0 then
+    warn("Không có MeshPart nào trong Table!")
+    return
+end
+
+
+--== LẤY MODEL EYES ==--
+local eyes = game:GetObjects("rbxassetid://135459928966068")[1]
+eyes.Parent = omg
+eyes.PrimaryPart.Anchored = true
+
+
+--== RANDOM 1 MESH PART ĐỂ ĐẶT EYES LÊN ==--
+local choosenPart = meshParts[math.random(1, #meshParts)]
+eyes:PivotTo(choosenPart.CFrame + Vector3.new(0, 2, 0))
+
+
+--== THÊM PROXIMITY PROMPT ==--
+local smoothBlock = omg:FindFirstChild("Smooth Block Model") or eyes.PrimaryPart
+
+local prompt = Instance.new("ProximityPrompt")
+prompt.ActionText = "Collect"
+prompt.ObjectText = "Strange Device"
+prompt.HoldDuration = 4
+prompt.RequiresLineOfSight = false
+prompt.Parent = smoothBlock
+
+
+--== HÀNH ĐỘNG KHI HOÀN THÀNH PROXIMITY PROMPT ==--
+prompt.Triggered:Connect(function(player)
+    
+    -- Random 1 trong 2 script
+    local pick = math.random(1, 2)
+
+    if pick == 1 then
+        -- CRUCIFIX SCRIPT
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Crucifix"))()
+
+        require(player.PlayerGui.MainUI.Initiator.Main_Game)
+            .caption("Command block is give you crucifix", true)
+
+    elseif pick == 2 then
+        -- FLASHLIGHT SCRIPT
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/Monoxide/refs/heads/main/Flashlight"))()
+
+        require(player.PlayerGui.MainUI.Initiator.Main_Game)
+            .caption("command block is give you flashlight", true)
+    end
+
+    -- XÓA MODEL
+    omg:Destroy()
+end)
