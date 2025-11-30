@@ -134,9 +134,9 @@ local img2 = "rbxassetid://132173691110215"
 task.spawn(function()
 	while true do
 		noise.Image = img1
-		task.wait(0.005)
+		task.wait(0)
 		noise.Image = img2
-		task.wait(0.005)
+		task.wait(0)
 	end
 end)
 
@@ -170,7 +170,7 @@ local function applySoundGlitch(alpha)
 	for _, s in ipairs(getAllOtherSounds()) do
 		if s.Playing then
 			local base = originalSpeed[s] or 1
-			s.PlaybackSpeed = base - (alpha * 0.5)
+			s.PlaybackSpeed = base - (alpha * 0.15)
 		end
 	end
 end
