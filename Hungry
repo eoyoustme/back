@@ -1,7 +1,7 @@
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Guiding Light: PLS DON'T OPEN THE DOOR YOU WILL DIE", true)
 local sound = Instance.new("Sound")
 sound.Parent = game.Workspace
-sound.Name = "s"
+sound.Name = "s2"
 sound.SoundId = "rbxassetid://9125712561"
 sound.Volume = 6
 sound.PlaybackSpeed = 1
@@ -14,6 +14,8 @@ game.Players.LocalPlayer.Character.Humanoid:TakeDamage(1000)
 game:GetService("ReplicatedStorage").GameStats["Player_".. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "Hungry"
 end)
 wait(14)
+a:Disconnect()
+game.Workspace.s2:Destroy()
 require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Guiding Light: you can open the door now", true)
 
 local sound = Instance.new("Sound")
