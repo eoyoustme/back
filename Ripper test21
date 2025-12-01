@@ -104,7 +104,7 @@ end
 wait(5.771)
 local TweenService = game:GetService("TweenService")
 local Tweeninfo = TweenInfo.new(2.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-local color = {Color = Color3.new(255, 255, 255)}
+local color = {Color = Color3.new(67, 51, 56)}
 
 for _, v in pairs(workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:GetDescendants()) do
     if v:IsA("Light") then
