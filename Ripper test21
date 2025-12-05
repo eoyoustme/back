@@ -1,7 +1,7 @@
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 ---====== Load spawner ======---
 
-local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+local spawner = loadstring(game:HttpGet(https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/test1"))()
 
 ---====== Create entity ======---
 
@@ -171,33 +171,13 @@ entity:SetCallback("OnDespawned", function()
 camShake:Start()
 camShake:ShakeOnce(10, 15, 0, 5.5, 1, 0)
 camShake:Shake(CameraShaker.Presets.Earthquake)
-
-workspace.CurrentRooms[game.ReplicatedStorage.GameData.LatestRoom.Value]:WaitForChild("Door").ClientOpen:FireServer()
-
-for _, v in pairs(workspace:WaitForChild("RipperMovings"):GetDescendants()) do
-	if v:IsA("Sound") then v:Destroy() end
-end
-
-tweenservice:Create(colorEffect, TweenInfo.new(10), {
-	TintColor = Color3.fromRGB(255, 255, 255),
-	Saturation = 0,
-	Contrast = 0
-}):Play()
-Debris:AddItem(colorEffect, 10)
-
-if get then
 local cue = Instance.new("Sound")
 cue.Parent = workspace
 cue.SoundId = "rbxassetid://1837829565"
 cue.Volume = 10
 cue.PlaybackSpeed = 0.85
-cue.Loaded:Wait()
 cue.TimePosition = 0
 cue:Play()
-
-	camShake:Start()
-	camShake:ShakeOnce(20, 5, 5, 3, 2, 1)
-end
 
 end)
 
