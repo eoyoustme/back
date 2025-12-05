@@ -1,7 +1,7 @@
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 ---====== Load spawner ======---
 
-local spawner = loadstring(game:HttpGet(https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/test1"))()
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/test1"))()
 
 ---====== Create entity ======---
 
@@ -168,9 +168,6 @@ end)
 
 entity:SetCallback("OnDespawned", function()
     print("Entity has despawned")
-camShake:Start()
-camShake:ShakeOnce(10, 15, 0, 5.5, 1, 0)
-camShake:Shake(CameraShaker.Presets.Earthquake)
 local cue = Instance.new("Sound")
 cue.Parent = workspace
 cue.SoundId = "rbxassetid://1837829565"
@@ -178,7 +175,6 @@ cue.Volume = 10
 cue.PlaybackSpeed = 0.85
 cue.TimePosition = 0
 cue:Play()
-
 end)
 
 local TweenService = game:GetService("TweenService")
