@@ -43,7 +43,7 @@ local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(sha
 end)
 camShake:Start()
 camShake:ShakeOnce(10,3,0.1,6,2,0.5)
-wait(4.8)
+wait(2.8)
  
 function GetGitSound(GithubSnd,SoundName)
  local url=GithubSnd
@@ -103,7 +103,7 @@ local entity = spawner.Create({
  },
  Movement = {
   Speed = 200,
-  Delay = 2,
+  Delay = 8,
   Reversed = true
  },
  Rebounding = {
@@ -235,7 +235,7 @@ local entity = spawner.Create({
  },
  Movement = {
   Speed = 200,
-  Delay = 2,
+  Delay = 8,
   Reversed = true
  },
  Rebounding = {
@@ -476,7 +476,7 @@ local entity = spawner.Create({
  },
  Movement = {
   Speed = 200,
-  Delay = 2,
+  Delay = 8,
   Reversed = true
  },
  Rebounding = {
