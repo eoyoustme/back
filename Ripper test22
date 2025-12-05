@@ -168,10 +168,18 @@ end)
 
 entity:SetCallback("OnDespawned", function()
     print("Entity has despawned")
+local CameraShaker = require(game.ReplicatedStorage.CameraShaker)
+local camara = game.Workspace.CurrentCamera
+local camShake = CameraShaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+ camara.CFrame = camara.CFrame * shakeCf
+end)
+camShake:Start()
+camShake:ShakeOnce(10,7,0.9,0.9,0.9,0.9)
+
 local cue = Instance.new("Sound")
 cue.Parent = workspace
 cue.SoundId = "rbxassetid://1837829565"
-cue.Volume = 10
+cue.Volume = 5
 cue.PlaybackSpeed = 0.85
 cue.TimePosition = 0
 cue:Play()
