@@ -52,7 +52,7 @@ local defaultEntityAttributes = {
 	BeingBanished = false,
 	Despawning = false,
 	Damage = true,
-	LastEnteredRoom = 1
+	LastEnteredRoom = 0
 }
 local defaultPlayerAttributes = {
 	SpawnProtection = 5
