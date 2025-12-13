@@ -197,7 +197,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 				-- nếu chưa phải lần cuối, chờ 1s rồi về 100, tiếp vòng
 				task.wait(waitTime)
 				if not targetImage or not targetImage.Parent then return end
-				targetImage.Size = UDim2.new(0, 400, 0, 400)
+				targetImage.Size = UDim2.new(0, 200, 0, 200)
 				task.wait(waitTime)
 			end
 		end
