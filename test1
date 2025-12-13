@@ -155,32 +155,41 @@ function GetCurrentRoom(latest)
 	return workspace.CurrentRooms:FindFirstChild(localPlayer:GetAttribute("CurrentRoom"))
 end
 
-function GetNodesFromRoom(room, reversed)
+-- Trả về nodes của 1 phòng, và số node đã thêm (count)
+function GetNodesFromRoom(room, reversed, baseIndex)
+	baseIndex = baseIndex or 0
 	local nodes = {}
+	local idx = 1
+
 	local roomEntrance = room:FindFirstChild("RoomEntrance")
 	if roomEntrance then
 		local n = roomEntrance:Clone()
-		n.Name = "0"
+		n.Name = tostring(baseIndex + idx) -- set tên theo global index
 		n.CFrame -= Vector3.new(0, 3, 0)
-		nodes[1] = n
+		nodes[#nodes + 1] = n
+		idx = idx + 1
 	end
 
 	local nodesFolder = room:FindFirstChild("PathfindNodes")
 	if nodesFolder then
-		for _, n in nodesFolder:GetChildren() do
+		for _, nInst in ipairs(nodesFolder:GetChildren()) do
+			local n = nInst:Clone()
+			n.Name = tostring(baseIndex + idx)
 			nodes[#nodes + 1] = n
+			idx = idx + 1
 		end
 	end
 
 	local roomExit = room:FindFirstChild("RoomExit")
 	if roomExit then
-		local index = #nodes + 1
 		local n = roomExit:Clone()
-		n.Name = index
+		n.Name = tostring(baseIndex + idx)
 		n.CFrame -= Vector3.new(0, 3, 0)
-		nodes[index] = n
+		nodes[#nodes + 1] = n
+		idx = idx + 1
 	end
 
+	-- sắp xếp cục bộ theo số (vẫn giữ logic reversed nếu cần)
 	table.sort(nodes, function(a, b)
 		if reversed then
 			return tonumber(a.Name) > tonumber(b.Name)
@@ -189,30 +198,83 @@ function GetNodesFromRoom(room, reversed)
 		end
 	end)
 
-	return nodes
+	return nodes, (idx - 1) -- trả về bảng node và count đã thêm
 end
 
 function GetPathfindNodesAmbush(config)
 	local pathfindNodes = {}
 	local rooms = workspace.CurrentRooms:GetChildren()
+	-- đảm bảo rooms theo thứ tự name numeric
+	table.sort(rooms, function(a,b) return tonumber(a.Name) < tonumber(b.Name) end)
+
+	local globalIndex = 0
 	if config.Movement.Reversed == false then
-		for i = 1, #rooms, 1 do
+		for i = 1, #rooms do
 			local room = rooms[i]
-			local roomNodes = GetNodesFromRoom(room, false)
-			for _, node in roomNodes do
+			local roomNodes, added = GetNodesFromRoom(room, false, globalIndex)
+			for _, node in ipairs(roomNodes) do
 				pathfindNodes[#pathfindNodes + 1] = node
 			end
+			globalIndex = globalIndex + added
 		end
 	else
+		-- nếu reversed: duyệt rooms từ cuối về đầu, nhưng vẫn gán index tăng dần (để giữ độc nhất)
 		for i = #rooms, 1, -1 do
 			local room = rooms[i]
-			local roomNodes = GetNodesFromRoom(room, true)
-			for _, node in roomNodes do
+			local roomNodes, added = GetNodesFromRoom(room, true, globalIndex)
+			for _, node in ipairs(roomNodes) do
 				pathfindNodes[#pathfindNodes + 1] = node
 			end
+			globalIndex = globalIndex + added
 		end
 	end
+
 	return pathfindNodes
+end
+
+function GetPathfindNodesBlitz(config)
+	local nodesToCurrent, nodesToEnd = {}, {}
+	local currentRoomIndex = localPlayer:GetAttribute("CurrentRoom")
+	local rooms = workspace.CurrentRooms:GetChildren()
+	-- đảm bảo rooms theo thứ tự name numeric
+	table.sort(rooms, function(a,b) return tonumber(a.Name) < tonumber(b.Name) end)
+
+	local globalIndex = 0
+	if config.Movement.Reversed == false then
+		for _, room in ipairs(rooms) do
+			local roomNodes, added = GetNodesFromRoom(room, false, globalIndex)
+			local roomIndex = tonumber(room.Name)
+			if roomIndex <= currentRoomIndex then
+				for _, n in ipairs(roomNodes) do
+					nodesToCurrent[#nodesToCurrent + 1] = n
+				end
+			else
+				for _, n in ipairs(roomNodes) do
+					nodesToEnd[#nodesToEnd + 1] = n
+				end
+			end
+			globalIndex = globalIndex + added
+		end
+	else
+		-- reversed case: duyệt rooms từ cuối về đầu
+		for i = #rooms, 1, -1 do
+			local room = rooms[i]
+			local roomNodes, added = GetNodesFromRoom(room, true, globalIndex)
+			local roomIndex = tonumber(room.Name)
+			if roomIndex >= currentRoomIndex then
+				for _, n in ipairs(roomNodes) do
+					nodesToCurrent[#nodesToCurrent + 1] = n
+				end
+			else
+				for _, n in ipairs(roomNodes) do
+					nodesToEnd[#nodesToEnd + 1] = n
+				end
+			end
+			globalIndex = globalIndex + added
+		end
+	end
+
+	return nodesToCurrent, nodesToEnd
 end
 
 function GetPathfindNodesBlitz(config)
