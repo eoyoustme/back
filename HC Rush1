@@ -113,7 +113,6 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 		local TweenService = game:GetService("TweenService")
 		local Players = game:GetService("Players")
 		local player = Players.LocalPlayer
-		print("Entity has killed the player")
 
 		-- Cấu hình
 		local TOGGLES = 1.5          -- số lần chuyển (kết thúc ở size 400 và play sound)
@@ -180,10 +179,61 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 			local offsetX = math.sin(5 * math.pi * elapsed / (PERIOD * 1.3)) * JITTER_X
 			local offsetY = math.cos(5 * math.pi * elapsed / (PERIOD * 1.1)) * JITTER_Y
 			image.Position = UDim2.new(0.5, offsetX, 0.5, offsetY)
-			end)
-	else
-		print("Entity has damaged the player")
-	end
+		end)
+		-- ==========================================
+
+		-- Sequence: alternation giữa size 100 và 400 mỗi 1 giây, kết thúc ở 400
+		local function runSizeSequence(targetImage, toggles, waitTime)
+			if not targetImage or not targetImage.Parent then return end
+			-- đảm bảo bắt đầu ở 100 (đã set phía trên)
+			for i = 1, toggles do
+				-- set trực tiếp sang 400 (không tween)
+				targetImage.Size = UDim2.new(0, 100, 0, 100)
+				-- nếu đây là lần cuối thì break sau chờ 1s để play sound + tween
+				if i == toggles then
+					task.wait(waitTime)
+					break
+				end
+				-- nếu chưa phải lần cuối, chờ 1s rồi về 100, tiếp vòng
+				task.wait(waitTime)
+				if not targetImage or not targetImage.Parent then return end
+				targetImage.Size = UDim2.new(0, 400, 0, 400)
+				task.wait(waitTime)
+			end
+		end
+
+		-- Chạy sequence (kết thúc ở size 400), rồi play sound và tween lớn
+		runSizeSequence(image, TOGGLES, WAIT_BETWEEN)
+		image.Image ="http://www.roblox.com/asset/?id=12293509957"
+
+		-- Khi đã xong sequence: play sound rồi tween scale lớn
+		if sound and sound.Parent then
+			pcall(function() sound:Play() end)
+		end
+
+		local bigTween = TweenService:Create(image, TweenInfo.new(FINAL_TWEEN_DURATION, Enum.EasingStyle.Linear), {Size = FINAL_SIZE})
+		bigTween:Play()
+
+		-- Cleanup: nếu bạn muốn giữ tween chạy lâu thì tăng thời gian chờ ở dưới hoặc xóa cleanup
+		-- Mình chờ 1.5s (giống code trước) rồi destroy UI + sound + disconnect conn
+		task.wait(1.5)
+		if sound then pcall(function() sound:Destroy() end) end
+		if screen then pcall(function() screen:Destroy() end) end
+		if conn then pcall(function() conn:Disconnect() end) end
+
+		-- =================================================================
+
+		-- Nếu bạn vẫn muốn destroy giống code gốc: (hiện bạn xóa sau 1 giây)
+		task.wait(0.7)
+		if sound then sound:Destroy() end
+		if screen then screen:Destroy() end
+		if conn then
+			pcall(function() conn:Disconnect() end)
+		else
+			
+		end
+	print("Entity has damaged the player")
+end
 end)
 
 ---====== Run entity ======---
