@@ -47,7 +47,7 @@ local moduleScripts = {
 }
 local defaultEntityAttributes = {
 	Running = false,
-	CustomEntity = true,
+	CustomEntity = false,
 	Paused = false,
 	BeingBanished = false,
 	Despawning = false,
