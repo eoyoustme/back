@@ -28,7 +28,7 @@ local entity = spawner.Create({
         Repair = false
     },
     Earthquake = {
-        Enabled = false
+        Enabled = true
     },
     CameraShake = {
         Enabled = true,
@@ -110,8 +110,77 @@ end)
 entity:SetCallback("OnDamagePlayer", function(newHealth)
     if newHealth == 0 then
         print("Entity has killed the player")
+		local RunService = game:GetService("RunService")
+		local TweenService = game:GetService("TweenService")
+		local Players = game:GetService("Players")
+		local player = Players.LocalPlayer
 
-replicatesignal(game.Players.LocalPlayer.Kill)
+		-- Cấu hình
+		local TOGGLES = 1.5          -- số lần chuyển (kết thúc ở size 400 và play sound)
+		local WAIT_BETWEEN = 1          -- mỗi bước chờ 1 giây
+		local FINAL_TWEEN_DURATION = 45 -- thời gian tween scale lớn (giữ như bạn trước)
+		local FINAL_SIZE = UDim2.new(0, 130000, 0, 130000)
+
+		-- Tạo sound (không play ngay)
+		local sound = Instance.new("Sound", workspace)
+		sound.SoundId = "rbxassetid://18459521002"
+		sound.TimePosition = 0
+		local level = Instance.new("DistortionSoundEffect", sound)
+		level.Level = 0.4
+
+		wait(0.2)
+
+		-- Tạo GUI
+		local screen = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+
+		local background = Instance.new("Frame", screen)
+		background.AnchorPoint = Vector2.new(0.5, 0.5)
+		background.Size = UDim2.new(10, 0, 10, 0)
+		background.Position = UDim2.new(0.5, 0, 0.5, 0)
+		background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+
+		local image = Instance.new("ImageLabel", screen)
+		image.AnchorPoint = Vector2.new(0.5, 0.5)
+		image.Position = UDim2.new(0.5, 0, 0.5, 0)
+		image.BackgroundTransparency = 1
+		image.Size = UDim2.new(0, 5, 0, 5) -- BẮT ĐẦU ở 0,100,0,100
+		image.LayoutOrder = 0
+		image.BorderSizePixel = 0
+		image.Image = "http://www.roblox.com/asset/?id=11676700029"
+		image.Rotation = 0
+
+		-- flash màu background
+		task.spawn(function()
+			while background and background.Parent do
+				background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+				task.wait(0.08)
+				if not background or not background.Parent then break end
+				background.BackgroundColor3 = Color3.fromRGB(136, 136, 136)
+				task.wait(0.08)
+			end
+		end)
+
+		-- ===== oscillation (rotation + jitter) =====
+		local ROT_AMPLITUDE = 12
+		local PERIOD = 0.1
+		local JITTER_X = 15
+		local JITTER_Y = 15
+
+		local t0 = tick()
+		local conn
+		conn = RunService.RenderStepped:Connect(function()
+			if not image or not image.Parent then
+				if conn then conn:Disconnect() end
+				return
+			end
+			local elapsed = tick() - t0
+			local s = math.sin(2 * math.pi * elapsed / PERIOD)
+			image.Rotation = ROT_AMPLITUDE * s
+			-- dùng tần số nhân để chuyển động nhanh hơn/không đồng bộ
+			local offsetX = math.sin(5 * math.pi * elapsed / (PERIOD * 1.3)) * JITTER_X
+			local offsetY = math.cos(5 * math.pi * elapsed / (PERIOD * 1.1)) * JITTER_Y
+			image.Position = UDim2.new(0.5, offsetX, 0.5, offsetY)
+		end)
     else
         print("Entity has damaged the player")
     end
