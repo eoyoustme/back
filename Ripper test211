@@ -176,13 +176,6 @@ end)
 camShake:Start()
 camShake:ShakeOnce(10,7,0.9,0.9,0.9,0.9)
 
-local cue = Instance.new("Sound")
-cue.Parent = workspace
-cue.SoundId = "rbxassetid://1837829565"
-cue.Volume = 5
-cue.PlaybackSpeed = 0.85
-cue.TimePosition = 0
-cue:Play()
 end)
 
 local TweenService = game:GetService("TweenService")
