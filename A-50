@@ -197,7 +197,7 @@ task.spawn(function()
                 return
             else
                 local camCFrame = camera.CFrame
-                local desiredPosition = camCFrame.Position + camCFrame.LookVector * 4 + Vector3.new(0, 2, 0)
+                local desiredPosition = camCFrame.Position + camCFrame.LookVector * 4 + Vector3.new(0, -0.5, 0)
                 primaryPart.CFrame = CFrame.new(desiredPosition, camCFrame.Position)
                 camera.CFrame = CFrame.lookAt(camera.CFrame.Position, primaryPart.Position)
             end
