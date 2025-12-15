@@ -3,7 +3,7 @@ game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 ---====== Load spawner ======---
 
 local success, spawner = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/test12"))()
 end)
 
 if not success or not spawner then
@@ -54,7 +54,7 @@ local entity = spawner.Create({
     },
     Crucifixion = {
         Enabled = true,
-        Range = 40,
+        Range = 70,
         Resist = false,
         Break = true
     },
@@ -118,121 +118,127 @@ end)
 entity:SetCallback("OnDamagePlayer", function(newHealth)
     if newHealth == 0 then
         print("Entity has killed the player")
+		local RunService = game:GetService("RunService")
+		local TweenService = game:GetService("TweenService")
+		local Players = game:GetService("Players")
+		local player = Players.LocalPlayer
 
-replicatesignal(game.Players.LocalPlayer.Kill)
--- UI Construction
-local JumpscareGui = Instance.new("ScreenGui")
-local Background = Instance.new("Frame")
-local Overlay = Instance.new("ImageLabel")
-local Face = Instance.new("ImageLabel")
+		-- Cấu hình
+		local TOGGLES = 1.5       -- số lần chuyển (kết thúc ở size 400 và play sound)
+		local WAIT_BETWEEN = 0.6        -- mỗi bước chờ 1 giây
+		local FINAL_TWEEN_DURATION = 35 -- thời gian tween scale lớn (giữ như bạn trước)
+		local FINAL_SIZE = UDim2.new(0, 1300000, 0, 1300000)
 
-JumpscareGui.Name = "JumpscareGui"
-JumpscareGui.IgnoreGuiInset = true
-JumpscareGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-JumpscareGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+		-- Tạo sound (không play ngay)
+		local sound = Instance.new("Sound", workspace)
+		sound.SoundId = "rbxassetid://18532501108"
+		sound.TimePosition = 0
+		local level = Instance.new("DistortionSoundEffect", sound)
+		level.Level = 0.4
 
-Background.Name = "Background"
-Background.BackgroundColor3 = Color3.fromRGB(3, 25, 99)
-Background.BorderSizePixel = 1
-Background.Size = UDim2.new(1, 0, 1, 0)
-Background.ZIndex = 999
-Background.Parent = JumpscareGui
+		wait(0.2)
+		sound:Play()
 
--- Full-screen overlay image
-Overlay.Name = "Overlay"
-Overlay.BackgroundTransparency = 1
-Overlay.Size = UDim2.new(1, 0, 1, 0)
-Overlay.Position = UDim2.new(0, 0, 0, 0)
-Overlay.Image = "rbxassetid://236542974" -- Thay bằng ID hình đầu tiên
-Overlay.ImageTransparency = 0
-Overlay.ZIndex = 998
-Overlay.Parent = Background
+		-- Tạo GUI
+		local screen = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 
--- Face image (jumpscare face)
-Face.Name = "Face"
-Face.AnchorPoint = Vector2.new(0.5, 0.5)
-Face.BackgroundTransparency = 1
-Face.Position = UDim2.new(0.5, 0, 0.5, 0)
-Face.ResampleMode = Enum.ResamplerMode.Pixelated
-Face.Size = UDim2.new(0, 150, 0, 150)
-Face.Image = "rbxassetid://12557955051"
-Face.ZIndex = 1000
-Face.ImageTransparency = 0
-Face.Parent = Background
+		local background = Instance.new("Frame", screen)
+		background.AnchorPoint = Vector2.new(0.5, 0.5)
+		background.Size = UDim2.new(10, 0, 10, 0)
+		background.Position = UDim2.new(0.5, 0, 0.5, 0)
+		background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 
--- Sound setup
-local scare = Instance.new("Sound")
-scare.Name = "MyEarsBurn"
-scare.SoundId = "rbxassetid://18532501108"
-scare.PlaybackSpeed = 1
-scare.Volume = 999
-scare.Parent = JumpscareGui
+		local image = Instance.new("ImageLabel", screen)
+		image.AnchorPoint = Vector2.new(0.5, 0.5)
+		image.Position = UDim2.new(0.5, 0, 0.5, 0)
+		image.BackgroundTransparency = 1
+		image.Size = UDim2.new(0, 5, 0, 5) -- BẮT ĐẦU ở 0,100,0,100
+		image.LayoutOrder = 0
+		image.BorderSizePixel = 0
+		image.Image = "http://www.roblox.com/asset/?id=12557955051"
+		image.Rotation = 0
 
-local shift = Instance.new("PitchShiftSoundEffect")
-shift.Octave = 1
-shift.Parent = scare
+		-- flash màu background
+		task.spawn(function()
+			while background and background.Parent do
+				background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+				task.wait(0.08)
+				if not background or not background.Parent then break end
+				background.BackgroundColor3 = Color3.fromRGB(85, 255, 0)
+				task.wait(0.08)
+			end
+		end)
 
-local distort = Instance.new("DistortionSoundEffect")
-distort.Level = 0.3
-distort.Parent = scare
+		-- ===== oscillation (rotation + jitter) =====
+		local ROT_AMPLITUDE = 6
+		local PERIOD = 0.1
+		local JITTER_X = 7
+		local JITTER_Y = 7
 
-local distort2 = Instance.new("DistortionSoundEffect")
-distort2.Level = 0.3
-distort2.Parent = scare
+		local t0 = tick()
+		local conn
+		conn = RunService.RenderStepped:Connect(function()
+			if not image or not image.Parent then
+				if conn then conn:Disconnect() end
+				return
+			end
+			local elapsed = tick() - t0
+			local s = math.sin(2 * math.pi * elapsed / PERIOD)
+			image.Rotation = ROT_AMPLITUDE * s
+			-- dùng tần số nhân để chuyển động nhanh hơn/không đồng bộ
+			local offsetX = math.sin(5 * math.pi * elapsed / (PERIOD * 1.3)) * JITTER_X
+			local offsetY = math.cos(5 * math.pi * elapsed / (PERIOD * 1.1)) * JITTER_Y
+			image.Position = UDim2.new(0.5, offsetX, 0.5, offsetY)
+		end)
+		-- ==========================================
 
-local eq = Instance.new("EqualizerSoundEffect")
-eq.HighGain = 10
-eq.MidGain = 10
-eq.LowGain = 3.7
-eq.Parent = scare
+		-- Sequence: alternation giữa size 100 và 400 mỗi 1 giây, kết thúc ở 400
+		local function runSizeSequence(targetImage, toggles, waitTime)
+			if not targetImage or not targetImage.Parent then return end
+			-- đảm bảo bắt đầu ở 100 (đã set phía trên)
+			for i = 1, toggles do
+				-- set trực tiếp sang 400 (không tween)
+				targetImage.Size = UDim2.new(0, 300, 0, 300)
+				-- nếu đây là lần cuối thì break sau chờ 1s để play sound + tween
+				if i == toggles then
+					task.wait(waitTime)
+					break
+				end
+				-- nếu chưa phải lần cuối, chờ 1s rồi về 100, tiếp vòng
+				task.wait(waitTime)
+				if not targetImage or not targetImage.Parent then return end
+				targetImage.Size = UDim2.new(0, 100, 0, 100)
+				task.wait(waitTime)
+			end
+		end
 
--- Flashing background
-task.spawn(function()
-	while JumpscareGui.Parent do
-		Background.BackgroundColor3 = Color3.fromRGB(3, 25, 99)
-		task.wait(math.random(25, 100) / 1000)
-		Background.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		task.wait(math.random(25, 100) / 1000)
-	end
-end)
+		-- Chạy sequence (kết thúc ở size 400), rồi play sound và tween lớn
+		runSizeSequence(image, TOGGLES, WAIT_BETWEEN)
+		image.Image ="http://www.roblox.com/asset/?id=12557955051"
 
--- Flashing overlay effect (alternate between 2 images)
-local overlayImages = {
-	"rbxassetid://184251462", -- Hình overlay 1
-	"rbxassetid://236542974"  -- Hình overlay 2
-}
+		-- Khi đã xong sequence: play sound rồi tween scale lớn
+		if sound and sound.Parent then
+			pcall(function() end)
+		end
 
-task.spawn(function()
-	local i = 1
-	while JumpscareGui.Parent do
-		Overlay.Image = overlayImages[i]
-		i = i % #overlayImages + 1
-		task.wait(0) -- Đổi hình mỗi 0.5 giây
-	end
-end)
+		local bigTween = TweenService:Create(image, TweenInfo.new(FINAL_TWEEN_DURATION, Enum.EasingStyle.Linear), {Size = FINAL_SIZE})
+		bigTween:Play()
 
--- Jumpscare zoom effect
-game.TweenService:Create(Face, TweenInfo.new(1.656, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-	Size = UDim2.new(2.5, 0, 2.5, 0),
-	ImageTransparency = 0
-}):Play()
+		-- Cleanup: nếu bạn muốn giữ tween chạy lâu thì tăng thời gian chờ ở dưới hoặc xóa cleanup
+		-- Mình chờ 1.5s (giống code trước) rồi destroy UI + sound + disconnect conn
+		task.wait(1)
+		if sound then pcall(function() sound:Destroy() end) end
+		if screen then pcall(function() screen:Destroy() end) end
+		if conn then pcall(function() conn:Disconnect() end) end
 
--- Shake effect
-task.spawn(function()
-	local originalPos = Face.Position
-	for i = 1, 15 do
-		local offsetX = math.random(-0, 0)
-		local offsetY = math.random(-0, 0)
-		Face.Position = originalPos + UDim2.new(0, offsetX, 0, offsetY)
-		task.wait(0.03)
-	end
-	Face.Position = originalPos
-end)
+		-- =================================================================
 
--- Play sound and cleanup
-scare:Play()
-task.wait(1.656)
-JumpscareGui:Destroy()
+		-- Nếu bạn vẫn muốn destroy giống code gốc: (hiện bạn xóa sau 1 giây)
+		task.wait(0.7)
+		if sound then sound:Destroy() end
+		if screen then screen:Destroy() end
+		if conn then
+			pcall(function() conn:Disconnect() end)
     else
         print("Entity has damaged the player")
     end
