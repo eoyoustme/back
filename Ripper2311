@@ -1,7 +1,7 @@
 
 ---====== Load spawner ======---
 
-local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/test23"))()
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/test2312"))()
 
 ---====== Create entity ======---
 
