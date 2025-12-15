@@ -1,7 +1,7 @@
 game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
 ---====== Load spawner ======---
 
-local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/test1"))()
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/test12"))()
 
 ---====== Create entity ======---
 
