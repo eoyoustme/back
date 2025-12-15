@@ -331,7 +331,7 @@ function CrucifixEntity(entityTable, tool)
 	end)
 
 	-- Animation
-	TweenService:Create(pentagram.Circle, TweenInfo.new(2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), { CFrame = pentagram.Circle.CFrame - Vector3.new(0, 25, 0) }):Play()
+	TweenService:Create(pentagram.Circle, TweenInfo.new(2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), { CFrame = pentagram.Circle.CFrame - Vector3.new(0, 0, 0) }):Play()
 	TweenService:Create(crucifix.BodyAngularVelocity, TweenInfo.new(4, Enum.EasingStyle.Sine, Enum.EasingDirection.In), { AngularVelocity = Vector3.new(0, 40, 0) }):Play()
 	task.delay(2, pentagram.Circle.Destroy, pentagram.Circle)
 
@@ -366,7 +366,7 @@ function CrucifixEntity(entityTable, tool)
 	-- Actions
 	if resist == false then
 		waitUntil(1)
-		TweenService:Create(entityPart, TweenInfo.new(2, Enum.EasingStyle.Back, Enum.EasingDirection.In), { CFrame = repentance.Entity.CFrame - Vector3.new(0, -2205, 0) }):Play()
+		TweenService:Create(entityPart, TweenInfo.new(2, Enum.EasingStyle.Back, Enum.EasingDirection.In), { CFrame = repentance.Entity.CFrame - Vector3.new(0, 350, 0) }):Play()
 		waitUntil(6.75)
 	else
 		waitUntil(4)
