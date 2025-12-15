@@ -287,7 +287,7 @@ function CrucifixEntity(entityTable, tool)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = {localChar, model}
-	local result = workspace:Raycast(entityPivot.Position, Vector3.new(0, 1000, 0), params)
+	local result = workspace:Raycast(entityPivot.Position, Vector3.new(0, 25, 0), params)
 	if not result then return end
 
 	-- Setup
@@ -366,7 +366,7 @@ function CrucifixEntity(entityTable, tool)
 	-- Actions
 	if resist == false then
 		waitUntil(1)
-		TweenService:Create(entityPart, TweenInfo.new(2, Enum.EasingStyle.Back, Enum.EasingDirection.In), { CFrame = repentance.Entity.CFrame - Vector3.new(0, 205, 0) }):Play()
+		TweenService:Create(entityPart, TweenInfo.new(2, Enum.EasingStyle.Back, Enum.EasingDirection.In), { CFrame = repentance.Entity.CFrame - Vector3.new(0, -2205, 0) }):Play()
 		waitUntil(6.75)
 	else
 		waitUntil(4)
