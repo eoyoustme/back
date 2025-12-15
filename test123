@@ -325,7 +325,7 @@ function CrucifixEntity(entityTable, tool)
 	repentance:PivotTo(CFrame.new(upResult.Position))
 	crucifix.CFrame = toolPivot
 	repentance.Entity.CFrame = entityPivot
-	crucifix.BodyPosition.Position = (localCollision.CFrame * CFrame.new(0.5, 3, -6)).Position
+	crucifix.BodyPosition.Position = (localCollision.CFrame * CFrame.new(0, 0, 0)).Position
 	repentance.Parent = workspace
 	sound:Play()
 
@@ -355,9 +355,9 @@ function CrucifixEntity(entityTable, tool)
 		groundPosition = downResult.Position
 	else
 		-- fallback: use entity pivot minus some offset if no hit
-		groundPosition = entityPart.Position - Vector3.new(0, 50, 0)
+		groundPosition = entityPart.Position - Vector3.new(0, 500, 0)
 	end
-	local pentagramSkyPos = groundPosition + Vector3.new(0, 400, 0)
+	local pentagramSkyPos = groundPosition + Vector3.new(0, 0, 0)
 
 	-- Place pentagram immediately in the sky above the nearest ground part
 	-- Use PivotTo to avoid parenting issues; ensure pentagram has a PrimaryPart or use its pivot.
