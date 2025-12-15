@@ -278,211 +278,115 @@ end
 function CrucifixEntity(entityTable, tool)
 	local model = entityTable.Model
 	local config = entityTable.Config
-
 	local resist = config.Crucifixion.Resist
 
-	local toolPivot = tool:GetPivot()
+	if not model or not model.Parent then return end
+
+	-- ===== POSITIONS =====
 	local entityPivot = model:GetPivot()
+	local groundPosition = entityPivot.Position
+	local skyOffset = Vector3.new(0, 400, 0)
+	local skyPosition = groundPosition + skyOffset
 
-	-- Raycast params (exclude char & the entity model)
-	local rayParams = RaycastParams.new()
-	rayParams.FilterType = Enum.RaycastFilterType.Exclude
-	rayParams.FilterDescendantsInstances = { localChar, model }
-
-	-- Raycast DOWN from entity pivot to find nearest ground/part below
-	local downOrigin = entityPivot.Position + Vector3.new(0, 2, 0)
-	local downDirection = Vector3.new(0, -2000, 0)
-	local downResult = workspace:Raycast(downOrigin, downDirection, rayParams)
-
-	-- fallback ground position if no hit
-	local groundPosition
-	if downResult and downResult.Position then
-		groundPosition = downResult.Position
-	else
-		groundPosition = entityPivot.Position - Vector3.new(0, 50, 0)
-	end
-
-	-- Setup
+	-- ===== SET STATE =====
 	model:SetAttribute("BeingBanished", true)
+	model:SetAttribute("Paused", true)
 
+	-- ===== CLONE ASSETS =====
 	local repentance = assets.Repentance:Clone()
-	local crucifix = repentance:FindFirstChild("Crucifix") or repentance:FindFirstChildWhichIsA("BasePart")
-	local pentagram = repentance:FindFirstChild("Pentagram")
-	local entityPart = repentance:FindFirstChild("Entity") or repentance.PrimaryPart
-	local sound = (config.Crucifixion.Resist and (crucifix and crucifix:FindFirstChild("SoundFail")) or (crucifix and crucifix:FindFirstChild("Sound"))) or nil
-	local shaker = (moduleScripts and moduleScripts.Main_Game and moduleScripts.Main_Game.camShaker) and moduleScripts.Main_Game.camShaker:StartShake(5, 20, 2, Vector3.new()) or nil
+	local crucifix = repentance.Crucifix
+	local pentagram = repentance.Pentagram
+	local entityPart = repentance.Entity
+	local sound = (resist and crucifix.SoundFail or crucifix.Sound)
 
-	-- place repentance at the entity's pivot (so visuals start at the entity)
-	repentance:PivotTo(CFrame.new(entityPivot.Position))
+	-- ===== PARENT FIRST (QUAN TRỌNG) =====
 	repentance.Parent = workspace
 
-	-- ensure crucifix/pentagram/entityPart references updated after parenting
-	crucifix = crucifix or repentance:FindFirstChild("Crucifix")
-	pentagram = pentagram or repentance:FindFirstChild("Pentagram")
-	entityPart = entityPart or repentance:FindFirstChild("Entity") or repentance.PrimaryPart
-
-	-- play sound safely
-	if sound and sound.Play then
-		pcall(function() sound:Play() end)
-	end
-
-	-- make the original model follow the repentance entity visual (keeps old behavior)
+	-- ===== FORCE ENTITY FOLLOW REPENTANCE ENTITY =====
 	task.spawn(function()
-		while model and model.Parent and repentance and repentance.Parent do
-			if entityPart and entityPart:IsA("BasePart") then
-				model:PivotTo(entityPart.CFrame)
-			end
+		while model.Parent and repentance.Parent do
+			model:PivotTo(entityPart.CFrame)
 			task.wait()
 		end
-		if model and model.Parent then
-			model:Destroy()
-		end
 	end)
 
-	-- place pentagram high above the nearest ground part (400 studs above)
-	local pentagramHeight = 400
-	local pentagramPos = groundPosition + Vector3.new(0, pentagramHeight, 0)
+	-- ===== SETUP ENTITY PART =====
+	entityPart.CFrame = entityPivot
+	entityPart.Anchored = true
 
-	-- place pentagram immediately (use PivotTo or PrimaryPart)
-	if pentagram then
-		-- ensure pentagram has a pivotable part; prefer PrimaryPart if set
-		if pentagram.PrimaryPart then
-			pentagram:SetPrimaryPartCFrame(CFrame.new(pentagramPos))
-		else
-			-- use PivotTo which works for Model
-			pentagram:PivotTo(CFrame.new(pentagramPos))
-		end
-		-- parent pentagram to workspace root so it stays independent
-		if not pentagram.Parent or pentagram.Parent ~= workspace then
-			pentagram.Parent = workspace
-		end
-	end
+	-- ===== SETUP CRUCIFIX =====
+	crucifix.CFrame = tool:GetPivot()
+	crucifix.BodyPosition.Position = skyPosition - Vector3.new(0, 40, 0)
 
-	-- fadeOut helper for beams (kept)
-	local function fadeOut()
-		if not pentagram then return end
-		for _, c in ipairs(pentagram:GetChildren()) do
-			if c.Name == "BeamFlat" then
-				local delayTime = c:GetAttribute("Delay") or 0
-				task.delay(delayTime, function()
-					if c and c:IsA("Instance") then
-						pcall(function()
-							TweenService:Create(c, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
-								Brightness = 0
-							}):Play()
-						end)
-					end
-				end)
+	-- ===== SETUP PENTAGRAM (VISIBLE, ANCHORED) =====
+	pentagram.Parent = workspace
+	pentagram:PivotTo(CFrame.new(skyPosition))
+
+	for _, d in ipairs(pentagram:GetDescendants()) do
+		if d:IsA("BasePart") then
+			d.Anchored = true
+			d.CanCollide = false
+			d.CanQuery = false
+			d.Transparency = 0
+		elseif d:IsA("Light") then
+			d.Brightness = 6
+			d.Range = 40
+		elseif d:IsA("Beam") then
+			if d:GetAttribute("OGBrightness") then
+				d.Brightness = d:GetAttribute("OGBrightness")
 			end
 		end
 	end
 
-	-- small visual start tweens (similar to original)
-	if pentagram and pentagram:FindFirstChild("Base") and pentagram.Base:FindFirstChild("LightAttach") then
-		local light = pentagram.Base.LightAttach:FindFirstChild("LightBright")
-		if light then
-			TweenService:Create(light, TweenInfo.new(0.001), {Brightness = light:GetAttribute("OGBrightness") or 0}):Play()
+	-- ===== SOUND =====
+	sound:Play()
+
+	-- ===== CAMERA SHAKE =====
+	local shaker = moduleScripts.Main_Game.camShaker:StartShake(5, 20, 2, Vector3.new())
+
+	-- ===== ENTITY BAY LÊN TRỜI NGAY =====
+	TweenService:Create(
+		entityPart,
+		TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+		{ CFrame = CFrame.new(skyPosition) }
+	):Play()
+
+	-- ===== PENTAGRAM FADE TRÊN TRỜI =====
+	local function fadePentagram()
+		for _, c in pentagram:GetDescendants() do
+			if c:IsA("Beam") then
+				TweenService:Create(c, TweenInfo.new(2), { Brightness = 0 }):Play()
+			elseif c:IsA("Light") then
+				TweenService:Create(c, TweenInfo.new(2), { Brightness = 0, Range = 0 }):Play()
+			elseif c:IsA("BasePart") then
+				TweenService:Create(c, TweenInfo.new(2), { Transparency = 1 }):Play()
+			end
 		end
 	end
 
-	-- run main visual sequence concurrently
+	-- ===== MAIN LOGIC =====
 	task.spawn(function()
-		-- timing preserved similar to original sequence
-		if shaker then
-			-- shaker already started above
+		task.wait(1)
+
+		if not resist then
+			shaker:StartFadeOut(3)
+			fadePentagram()
 		end
 
-		-- start some delayed light/enlarge effects after a short time (kept from original)
-		task.wait(2.625)
-		if pentagram and pentagram.Base and pentagram.Base.LightAttach and pentagram.Base.LightAttach.LightBright then
-			pcall(function()
-				TweenService:Create(pentagram.Base.LightAttach.LightBright, TweenInfo.new(1.5, Enum.EasingStyle.Circular, Enum.EasingDirection.InOut), {
-					Brightness = 5,
-					Range = 40
-				}):Play()
-			end)
-		end
-		if crucifix and crucifix:FindFirstChild("Light") then
-			pcall(function()
-				TweenService:Create(crucifix.Light, TweenInfo.new(1.5, Enum.EasingStyle.Circular, Enum.EasingDirection.InOut), {
-					Brightness = 11.25,
-					Range = 30
-				}):Play()
-			end)
+		task.wait(3)
+
+		if not resist then
+			model:Destroy()
+		else
+			model:SetAttribute("BeingBanished", false)
+			model:SetAttribute("Paused", false)
 		end
 
-		task.wait(1.5)
-		-- fade back down lights
-		pcall(function()
-			if pentagram and pentagram.Base and pentagram.Base.LightAttach and pentagram.Base.LightAttach.LightBright then
-				TweenService:Create(pentagram.Base.LightAttach.LightBright, TweenInfo.new(1.5, Enum.EasingStyle.Circular, Enum.EasingDirection.InOut), {
-					Brightness = 0,
-					Range = 0
-				}):Play()
-			end
-			if crucifix and crucifix:FindFirstChild("Light") then
-				TweenService:Create(crucifix.Light, TweenInfo.new(1.5, Enum.EasingStyle.Circular, Enum.EasingDirection.InOut), {
-					Brightness = 0,
-					Range = 0
-				}):Play()
-			end
+		-- cleanup
+		task.delay(4, function()
+			if repentance then repentance:Destroy() end
+			if pentagram then pentagram:Destroy() end
 		end)
-
-		if resist == false then
-			-- immediate visual changes
-			if crucifix and crucifix:FindFirstChild("Light") then
-				TweenService:Create(crucifix.Light, TweenInfo.new(1, Enum.EasingStyle.Circular, Enum.EasingDirection.InOut), { Brightness = 15, Range = 40 }):Play()
-			end
-			if shaker and shaker.StartFadeOut then
-				shaker:StartFadeOut(3)
-			end
-			fadeOut()
-			if crucifix and crucifix:FindFirstChild("BodyAngularVelocity") then
-				TweenService:Create(crucifix.BodyAngularVelocity, TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { AngularVelocity = Vector3.new() }):Play()
-			end
-		end
-	end)
-
-	-- === FLY UP entityPart immediately ===
-	if entityPart and entityPart:IsA("BasePart") then
-		local flyUpTime = 1
-		local flyUpOffset = Vector3.new(0, 400, 0)
-		local startCFrame = entityPart.CFrame
-		local targetCFrame = startCFrame + flyUpOffset
-
-		-- ensure it's networkowned / tweenable: unanchor if anchored
-		if entityPart.Anchored then
-			entityPart.Anchored = false
-		end
-
-		local flyTween = TweenService:Create(entityPart, TweenInfo.new(flyUpTime, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
-			CFrame = targetCFrame
-		})
-		flyTween:Play()
-		-- optionally wait for completion for sync
-		flyTween.Completed:Wait()
-	end
-
-	-- finish: explosion / cleanup (kept similar to original)
-	if not resist then
-		if repentance:FindFirstChild("Crucifix") and repentance.Crucifix:FindFirstChild("ExplodeParticle") then
-			pcall(function()
-				repentance.Crucifix.ExplodeParticle:Emit(math.random(20, 30))
-			end)
-		end
-		if moduleScripts and moduleScripts.Main_Game and moduleScripts.Main_Game.camShaker and moduleScripts.Main_Game.camShaker.ShakeOnce then
-			moduleScripts.Main_Game.camShaker:ShakeOnce(7.5, 7.5, 0.25, 1.5)
-		end
-	else
-		model:SetAttribute("BeingBanished", false)
-		model:SetAttribute("Paused", false)
-		fadeOut()
-	end
-
-	task.delay(5, function()
-		if repentance and repentance.Parent then
-			repentance:Destroy()
-		end
 	end)
 end
 
