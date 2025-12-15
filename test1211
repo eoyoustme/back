@@ -287,8 +287,9 @@ function CrucifixEntity(entityTable, tool)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = {localChar, model}
-	local result = workspace:Raycast(entityPivot.Position, Vector3.new(0, 55, 0), params)
-	if not result then return end
+	-- original raycast upward (keeps it, but we also raycast downward to find nearest ground part)
+	local upResult = workspace:Raycast(entityPivot.Position, Vector3.new(0, 55, 0), params)
+	if not upResult then return end
 
 	-- Setup
 	model:SetAttribute("BeingBanished", true)
@@ -300,13 +301,18 @@ function CrucifixEntity(entityTable, tool)
 	local sound = (config.Crucifixion.Resist and crucifix.SoundFail or crucifix.Sound)
 	local shaker = moduleScripts.Main_Game.camShaker:StartShake(5, 20, 2, Vector3.new())
 
+	-- helper: wait until sound reaches time t
 	local function waitUntil(t)
 		repeat RunService.RenderStepped:Wait() until sound.TimePosition >= t
 	end
+
+	-- fade out pentagram beams (kept)
 	local function fadeOut()
-		for _, c in pentagram:GetChildren() do
+		for _, c in ipairs(pentagram:GetChildren()) do
 			if c.Name == "BeamFlat" then
-				task.delay(c:GetAttribute("Delay"), function()
+				-- Use attribute Delay if exists (keeps original behavior of staggering)
+				local delayTime = c:GetAttribute("Delay") or 0
+				task.delay(delayTime, function()
 					TweenService:Create(c, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
 						Brightness = 0
 					}):Play()
@@ -315,13 +321,15 @@ function CrucifixEntity(entityTable, tool)
 		end
 	end
 
-	repentance:PivotTo(CFrame.new(result.Position))
+	-- place repentance at hit position (original)
+	repentance:PivotTo(CFrame.new(upResult.Position))
 	crucifix.CFrame = toolPivot
 	repentance.Entity.CFrame = entityPivot
 	crucifix.BodyPosition.Position = (localCollision.CFrame * CFrame.new(0.5, 3, -6)).Position
 	repentance.Parent = workspace
 	sound:Play()
 
+	-- Make the spawned model follow the repentance entity visual (original loop)
 	task.spawn(function()
 		while model.Parent and repentance.Parent do
 			model:PivotTo(entityPart.CFrame)
@@ -330,11 +338,36 @@ function CrucifixEntity(entityTable, tool)
 		model:Destroy()
 	end)
 
-	-- Animation
-	TweenService:Create(pentagram.Circle, TweenInfo.new(2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), { CFrame = pentagram.Circle.CFrame - Vector3.new(0, 0, 0) }):Play()
+	-- Animation tweaks (kept, but unchanged)
+	TweenService:Create(pentagram.Circle, TweenInfo.new(2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), { CFrame = pentagram.Circle.CFrame }):Play()
 	TweenService:Create(crucifix.BodyAngularVelocity, TweenInfo.new(4, Enum.EasingStyle.Sine, Enum.EasingDirection.In), { AngularVelocity = Vector3.new(0, -400, 0) }):Play()
 	task.delay(2, pentagram.Circle.Destroy, pentagram.Circle)
 
+	-- Prepare pentagram SKY position:
+	-- Raycast DOWN from the entity pivot to find the nearest part below; place pentagram 400 studs above that part.
+	local downParams = RaycastParams.new()
+	downParams.FilterType = Enum.RaycastFilterType.Exclude
+	downParams.FilterDescendantsInstances = {model, localChar, repentance}
+	-- long downward ray to find ground/closest part under the entity
+	local downResult = workspace:Raycast(entityPart.Position + Vector3.new(0, 2, 0), Vector3.new(0, -2000, 0), downParams)
+	local groundPosition
+	if downResult and downResult.Position then
+		groundPosition = downResult.Position
+	else
+		-- fallback: use entity pivot minus some offset if no hit
+		groundPosition = entityPart.Position - Vector3.new(0, 50, 0)
+	end
+	local pentagramSkyPos = groundPosition + Vector3.new(0, 400, 0)
+
+	-- Place pentagram immediately in the sky above the nearest ground part
+	-- Use PivotTo to avoid parenting issues; ensure pentagram has a PrimaryPart or use its pivot.
+	if pentagram.PrimaryPart then
+		pentagram:SetPrimaryPartCFrame(CFrame.new(pentagramSkyPos))
+	else
+		pentagram:PivotTo(CFrame.new(pentagramSkyPos))
+	end
+
+	-- Start fade/visual effects as before
 	task.spawn(function()
 		waitUntil(2.625)
 		TweenService:Create(pentagram.Base.LightAttach.LightBright, TweenInfo.new(1.5, Enum.EasingStyle.Circular, Enum.EasingDirection.InOut), {
@@ -358,19 +391,35 @@ function CrucifixEntity(entityTable, tool)
 		if resist == false then
 			TweenService:Create(crucifix.Light, TweenInfo.new(1, Enum.EasingStyle.Circular, Enum.EasingDirection.InOut), { Brightness = 15, Range = 40 }):Play()
 			shaker:StartFadeOut(3)
+			-- fade pentagram beams out (staggered using Delay attribute)
 			fadeOut()
 			TweenService:Create(crucifix.BodyAngularVelocity, TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { AngularVelocity = Vector3.new() }):Play()
 		end
 	end)
 
-	-- Actions
+	-- === ACTIONS: fly entityPart UP immediately by ~400 studs over 1 second ===
+	-- We no longer wait; the tween happens right away.
+	local flyUpTime = 1
+	local flyUpOffset = Vector3.new(0, 400, 0)
+	-- Compute target CFrame in world space: move entityPart up from its current CFrame
+	local targetCFrame = entityPart.CFrame * CFrame.new(flyUpOffset)
+
+	-- Create and play tween immediately
+	local flyTween = TweenService:Create(entityPart, TweenInfo.new(flyUpTime, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {
+		CFrame = targetCFrame
+	})
+	flyTween:Play()
+
+	-- If resist == false, keep the original stronger timings but we already launched the fly tween
 	if resist == false then
-		waitUntil(1)
-		TweenService:Create(entityPart, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.In), { CFrame = repentance.Entity.CFrame - Vector3.new(0, -350, 0) }):Play()
+		-- Wait until tween completes or sound time passes certain point
+		flyTween.Completed:Wait()
+		-- small additional wait to sync with effects (optional)
 		waitUntil(6.75)
 	else
+		-- For resist true, we still allow the alternate visual sequence but the entity already flew up
 		waitUntil(4)
-		TweenService:Create(crucifix.BodyAngularVelocity, TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { AngularVelocity = Vector3.new(0, -350,0 ) }):Play()
+		TweenService:Create(crucifix.BodyAngularVelocity, TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { AngularVelocity = Vector3.new(0, -350, 0) }):Play()
 		TweenService:Create(pentagram.Base.LightAttach.LightBright, TweenInfo.new(1.5, Enum.EasingStyle.Circular, Enum.EasingDirection.InOut), { Brightness = 0, Range = 0, Color = Color3.fromRGB(255, 116, 130) }):Play()
 		TweenService:Create(crucifix.Light, TweenInfo.new(1.5, Enum.EasingStyle.Circular, Enum.EasingDirection.InOut), { Brightness = 0, Range = 0, Color = Color3.fromRGB(255, 116, 130) }):Play()
 		shaker:StartFadeOut(3)
@@ -382,10 +431,9 @@ function CrucifixEntity(entityTable, tool)
 			tween:Play()
 
 			while tween.PlaybackState == Enum.PlaybackState.Playing do
-				for _, d in repentance:GetDescendants() do
+				for _, d in ipairs(repentance:GetDescendants()) do
 					if d.ClassName == "Beam" then
 						d.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, color.Value), ColorSequenceKeypoint.new(1, color.Value)}
-
 					elseif d.Name == "Crucifix" then
 						d.Color = color.Value
 					end
@@ -396,7 +444,7 @@ function CrucifixEntity(entityTable, tool)
 		waitUntil(9.625)
 	end
 
-	-- Crucifix explode
+	-- Crucifix explode & cleanup (kept)
 	TweenService:Create(repentance.Crucifix, TweenInfo.new(1), { Size = repentance.Crucifix.Size * 3, Transparency = 1 }):Play()
 	TweenService:Create(repentance.Pentagram.Base.LightAttach.LightBright, TweenInfo.new(1), { Brightness = 0, Range = 0 }):Play()
 	TweenService:Create(repentance.Crucifix.Light, TweenInfo.new(1), { Brightness = 0, Range = 0 }):Play()
@@ -409,6 +457,7 @@ function CrucifixEntity(entityTable, tool)
 		model:SetAttribute("Paused", false)
 		fadeOut()
 	end
+
 	task.delay(5, repentance.Destroy, repentance)
 end
 
