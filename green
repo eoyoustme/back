@@ -1,0 +1,13 @@
+wait(1)
+
+-- Define the material and color you want to use for the grass
+local material = Enum.Material.Grass
+local color = Color3.fromRGB(127, 255, 0)
+
+-- Loop through all the parts in the workspace and change their material and color to the grass material and color
+for _, part in pairs(game.Workspace:GetDescendants()) do
+    if part:IsA("BasePart") then
+        part.Material = material
+        part.Color = color
+    end
+end
