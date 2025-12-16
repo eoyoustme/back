@@ -65,6 +65,7 @@ local function spawnShadow()
 	prompt.ActionText = "Take"
 	prompt.ObjectText = "Shadow"
 	prompt.MaxActivationDistance = 5
+    prompt.Style = Enum.ProximityPromptStyle.Custom
 	prompt.HoldDuration = 3
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = handle
