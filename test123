@@ -1,18 +1,21 @@
--- LocalScript TEST spawn shadow at keyhitbox (NO %)
+-- LocalScript TEST Shadow + Troll Mechanic
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
 
--- load asset
-local shadow = game:GetObjects("rbxassetid://11631916882")[1]
-if not shadow then
+-- load shadow asset
+local shadowAsset = game:GetObjects("rbxassetid://102903378733273")[1]
+if not shadowAsset then
 	warn("Không load được shadow asset")
 	return
 end
 
--- tìm keyhitbox trong toàn game
+-- tìm keyhitbox
 local function findKeyHitbox()
 	for _, obj in ipairs(workspace:GetDescendants()) do
 		if obj:IsA("BasePart") and obj.Name:lower() == "keyhitbox" then
@@ -22,64 +25,114 @@ local function findKeyHitbox()
 	return nil
 end
 
--- spawn shadow tại keyhitbox
+-- spawn shadow
 local function spawnShadow()
 	local keyhitbox = findKeyHitbox()
 	if not keyhitbox then
-		warn("Không tìm thấy keyhitbox trong workspace")
+		warn("Không tìm thấy keyhitbox")
 		return
 	end
 
-	local clone = shadow:Clone()
-	clone.Parent = workspace
+	local shadow = shadowAsset:Clone()
+	shadow.Parent = workspace
 
-	-- tìm Handle
-	local handle = clone:FindFirstChild("Handle", true)
-	if not handle then
-		handle = clone:FindFirstChildWhichIsA("BasePart", true)
-	end
+	local handle = shadow:FindFirstChild("Handle", true)
+		or shadow:FindFirstChildWhichIsA("BasePart", true)
 
 	if not handle then
 		warn("Shadow không có Handle/BasePart")
 		return
 	end
 
-	-- set primary part
-	if not clone.PrimaryPart then
-		clone.PrimaryPart = handle
+	if not shadow.PrimaryPart then
+		shadow.PrimaryPart = handle
 	end
 
-	-- đặt đúng vị trí keyhitbox
-	clone:SetPrimaryPartCFrame(CFrame.new(keyhitbox.Position))
+	shadow:SetPrimaryPartCFrame(CFrame.new(keyhitbox.Position))
 
-	-- cố định vật lý
-	for _, p in ipairs(clone:GetDescendants()) do
+	for _, p in ipairs(shadow:GetDescendants()) do
 		if p:IsA("BasePart") then
 			p.Anchored = true
 			p.CanCollide = false
 		end
 	end
 
-	-- add ProximityPrompt
+	-- trạng thái troll
+	local usedOnce = false
+	local exploded = false
+
 	local prompt = Instance.new("ProximityPrompt")
-	prompt.ActionText = "Test Activate"
+	prompt.ActionText = "Take"
 	prompt.ObjectText = "Shadow"
 	prompt.MaxActivationDistance = 5
 	prompt.HoldDuration = 3
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = handle
 
-	prompt.Triggered:Connect(function()
-		print("Prompt triggered!")
-		pcall(function()
-			loadstring(game:HttpGet(
-				"https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/cruc"
-			))()
+	prompt.Triggered:Connect(function(plr)
+		if plr ~= player or exploded then return end
+
+		-- LẦN ĐẦU
+		if not usedOnce then
+			usedOnce = true
+			print("Shadow: lần đầu...")
+
+			-- hiệu ứng nhẹ
+			TweenService:Create(handle, TweenInfo.new(0.2), {
+				Transparency = 0.2
+			}):Play()
+
+			-- chạy cruc
+			pcall(function()
+				loadstring(game:HttpGet(
+					"https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/cruc"
+				))()
+			end)
+
+			return
+		end
+
+		-- LẦN THỨ HAI = CHẾT
+		exploded = true
+		print("Shadow: tham lam rồi 😈")
+
+		-- rung camera nhẹ
+		local cam = workspace.CurrentCamera
+		local oldCF = cam.CFrame
+		task.spawn(function()
+			for i = 1, 8 do
+				cam.CFrame = oldCF * CFrame.new(
+					math.random(-2,2)/10,
+					math.random(-2,2)/10,
+					0
+				)
+				task.wait(0.03)
+			end
+			cam.CFrame = oldCF
+		end)
+
+		-- hiệu ứng nổ
+		for _, p in ipairs(shadow:GetDescendants()) do
+			if p:IsA("BasePart") then
+				TweenService:Create(p, TweenInfo.new(0.3), {
+					Transparency = 1,
+					Size = p.Size * 2
+				}):Play()
+			end
+		end
+
+		task.wait(0.15)
+
+		-- CHẾT NGAY
+		humanoid.Health = 0
+
+		task.delay(1, function()
+			if shadow then shadow:Destroy() end
 		end)
 	end)
 end
 
--- bấm phím B để test
+-- BẤM B ĐỂ TEST
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if gpe then return end
 	if input.KeyCode == Enum.KeyCode.B then
@@ -87,4 +140,4 @@ UserInputService.InputBegan:Connect(function(input, gpe)
 	end
 end)
 
-print("[TEST] Press B to spawn Shadow at keyhitbox")
+print("[TEST] Press B to spawn Shadow (TROLL ENABLED)")
