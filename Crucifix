@@ -1,220 +1,118 @@
--- LocalScript (put in StarterPlayerScripts)
+-- Shadow Normal Script (6% chance ONLY if keyhitbox exists)
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
-local plr = Players.LocalPlayer
-if not plr then return end
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
 
--- asset template (shadow)
-local ok, shadowTemplate = pcall(function()
-	return game:GetObjects("rbxassetid://11631916882")[1]
-end)
-if not ok or not shadowTemplate then
-	warn("Không thể load shadow asset (rbxassetid://11631916882).")
-	shadowTemplate = nil
-end
+local LatestRoom = ReplicatedStorage:WaitForChild("GameData"):WaitForChild("LatestRoom")
 
--- game data value
-local gameData = ReplicatedStorage:WaitForChild("GameData", 5)
-if not gameData then
-	warn("Không tìm thấy ReplicatedStorage.GameData")
+-- Load shadow asset
+local shadowAsset = game:GetObjects("rbxassetid://102903378733273")[1]
+if not shadowAsset then
+	warn("Không load được shadow asset")
 	return
 end
 
-local latestRoom = gameData:FindFirstChild("LatestRoom")
-if not latestRoom then
-	warn("Không tìm thấy GameData.LatestRoom")
-	return
-end
-
--- chance percent (6%)
-local CHANCE_PERCENT = 6
-
--- helper: safe random seed on client
-math.randomseed(tick() + plr.UserId)
-
--- tìm model phòng hiện tại (cố gắng theo workspace.CurrentRooms -> roomIndex)
-local function getCurrentRoomModel(roomIndex)
-	-- roomIndex có thể là number hoặc string
-	local name = tostring(roomIndex)
-	-- ưu tiên folder CurrentRooms nếu tồn tại
-	if workspace:FindFirstChild("CurrentRooms") then
-		local folder = workspace.CurrentRooms
-		local room = folder:FindFirstChild(name)
-		if room then return room end
-	end
-	-- fallback: tìm trực tiếp workspace child trùng tên
-	if workspace:FindFirstChild(name) then
-		return workspace:FindFirstChild(name)
-	end
-	-- không tìm thấy
-	return nil
-end
-
--- tìm keyhitbox trong room model
-local function findKeyHitboxInRoom(roomModel)
-	if not roomModel then return nil end
-	-- tìm descendant tên "keyhitbox" (không phân biệt hoa thường)
-	for _, d in ipairs(roomModel:GetDescendants()) do
-		if d:IsA("BasePart") and d.Name:lower() == "keyhitbox" then
-			return d
+-- Tìm keyhitbox
+local function findKeyHitbox()
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("BasePart") and obj.Name:lower() == "keyhitbox" then
+			return obj
 		end
 	end
 	return nil
 end
 
--- spawn shadow at key position + add prompt
-local function spawnShadowAtKey(keyPart)
-	if not shadowTemplate then return end
-	if not keyPart or not keyPart.Parent then return end
+-- Spawn shadow
+local function spawnShadow(keyhitbox)
+	local shadow = shadowAsset:Clone()
+	shadow.Parent = workspace
 
-	-- clone template
-	local clone = shadowTemplate:Clone()
-	if not clone then return end
+	local handle = shadow:FindFirstChild("Handle", true)
+		or shadow:FindFirstChildWhichIsA("BasePart", true)
+	if not handle then return end
 
-	-- parent clone temporarily to workspace
-	clone.Parent = workspace
-
-	-- try find a MeshPart/Part named "Handle" inside the clone
-	local handle = clone:FindFirstChild("Handle", true)
-	-- if no "Handle", fallback to first BasePart found
-	if not handle then
-		handle = clone:FindFirstChildWhichIsA("BasePart", true)
+	if not shadow.PrimaryPart then
+		shadow.PrimaryPart = handle
 	end
 
-	-- position the clone so that its handle aligns with keyPart
-	if handle and handle:IsA("BasePart") then
-		-- ensure primary part
-		if not clone.PrimaryPart then
-			clone.PrimaryPart = handle
-		end
+	shadow:SetPrimaryPartCFrame(CFrame.new(keyhitbox.Position))
 
-		-- set position: place the handle center at keyPart.Position
-		pcall(function()
-			clone:SetPrimaryPartCFrame(CFrame.new(keyPart.Position))
-		end)
-
-		-- make sure visible and non-physics (optional)
-		for _, part in ipairs(clone:GetDescendants()) do
-			if part:IsA("BasePart") then
-				-- anchor to avoid falling
-				pcall(function() part.Anchored = true end)
-				pcall(function() part.CanCollide = false end)
-			end
-		end
-
-		-- create ProximityPrompt on handle
-		local prompt = Instance.new("ProximityPrompt")
-		prompt.Name = "ShadowPrompt"
-		prompt.ActionText = "Activate"
-		prompt.ObjectText = clone.Name or "Mysterious"
-		prompt.RequiresLineOfSight = false
-		prompt.MaxActivationDistance = 5
-		prompt.HoldDuration = 3
-		prompt.Parent = handle
-
-		-- ensure we only allow this player to activate (clientside) -- on client, Triggered will fire locally
-		local activated = false
-		prompt.Triggered:Connect(function()
-			-- prevent multi-trigger spam
-			if activated then return end
-			activated = true
-
-			-- run remote code safely
-			task.spawn(function()
-				local ok, res = pcall(function()
-					local source = game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/cruc")
-					local f = loadstring(source)
-					if type(f) == "function" then
-						f()
-					end
-				end)
-				if not ok then
-					warn("Failed to load/execute remote cruc script:", res)
-				end
-			end)
-		end)
-
-	else
-		-- fallback: no handle found, just place clone at keyPart and add prompt on the clone root if possible
-		pcall(function()
-			if clone.PrimaryPart then
-				clone:SetPrimaryPartCFrame(CFrame.new(keyPart.Position))
-			else
-				clone:PivotTo(CFrame.new(keyPart.Position))
-			end
-		end)
-
-		-- add prompt to first BasePart
-		local bp = clone:FindFirstChildWhichIsA("BasePart", true)
-		if bp then
-			local prompt = Instance.new("ProximityPrompt")
-			prompt.Name = "ShadowPrompt"
-			prompt.ActionText = "Activate"
-			prompt.ObjectText = clone.Name or "Mysterious"
-			prompt.RequiresLineOfSight = false
-			prompt.MaxActivationDistance = 5
-			prompt.HoldDuration = 3
-			prompt.Parent = bp
-
-			prompt.Triggered:Connect(function()
-				local ok, res = pcall(function()
-					local source = game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/cruc")
-					local f = loadstring(source)
-					if type(f) == "function" then
-						f()
-					end
-				end)
-				if not ok then
-					warn("Failed to load/execute remote cruc script:", res)
-				end
-			end)
+	for _, p in ipairs(shadow:GetDescendants()) do
+		if p:IsA("BasePart") then
+			p.Anchored = true
+			p.CanCollide = false
 		end
 	end
-end
 
--- MAIN: react to LatestRoom change
--- Use GetPropertyChangedSignal("Value") if LatestRoom is a Value object; fallback to Changed
-local connectFn
-if latestRoom:GetAttribute ~= nil and (latestRoom.ClassName == "IntValue" or latestRoom.ClassName == "StringValue" or latestRoom.ClassName == "NumberValue") then
-	connectFn = function(fn) latestRoom:GetPropertyChangedSignal("Value"):Connect(fn) end
-else
-	connectFn = function(fn) latestRoom.Changed:Connect(fn) end
-end
+	local usedOnce = false
+	local exploded = false
 
-connectFn(function()
-	-- small debounce to allow new room fully load
-	task.delay(0.15, function()
-		-- read room index/value
-		local roomIndex = latestRoom.Value or latestRoom.Name or latestRoom -- best effort
-		-- get room model
-		local roomModel = getCurrentRoomModel(roomIndex)
-		if not roomModel then
-			-- no room model found: do nothing
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.ActionText = "Take"
+	prompt.ObjectText = "???"
+	prompt.MaxActivationDistance = 5
+	prompt.HoldDuration = 3
+    prompt.Style = Enum.ProximityPromptStyle.Custom
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = handle
+
+	prompt.Triggered:Connect(function(plr)
+		if plr ~= player or exploded then return end
+
+		-- Lần 1
+		if not usedOnce then
+			usedOnce = true
+			pcall(function()
+				loadstring(game:HttpGet(
+					"https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/cruc"
+				))()
+			end)
 			return
 		end
 
-		-- check for keyhitbox inside this room
-		local key = findKeyHitboxInRoom(roomModel)
-		if not key then
-			-- no keyhitbox in this room -> nothing
-			return
+		-- Lần 2 → chết
+		exploded = true
+
+		for _, p in ipairs(shadow:GetDescendants()) do
+			if p:IsA("BasePart") then
+				TweenService:Create(p, TweenInfo.new(0.3), {
+					Transparency = 1,
+					Size = p.Size * 2
+				}):Play()
+			end
 		end
 
-		-- roll chance
-		local roll = math.random(1, 100)
-		if roll <= CHANCE_PERCENT then
-			-- spawn
-			spawn(function()
-				pcall(function()
-					spawnShadowAtKey(key)
-				end)
-			end)
-		end
+		task.wait(0.15)
+		humanoid.Health = 0
+
+		task.delay(1, function()
+			if shadow then shadow:Destroy() end
+		end)
 	end)
+end
+
+-- Khi sang phòng mới
+LatestRoom.Changed:Connect(function()
+	task.wait(0.3)
+
+	-- 1️⃣ KIỂM TRA KEYHITBOX TRƯỚC
+	local keyhitbox = findKeyHitbox()
+	if not keyhitbox then
+		return -- ❌ không có keyhitbox → không roll %
+	end
+
+	-- 2️⃣ CHỈ LÚC NÀY MỚI RANDOM
+	if math.random(1, 100) > 11 then
+		return
+	end
+
+	-- 3️⃣ TRÚNG → SPAWN
+	spawnShadow(keyhitbox)
 end)
 
--- optionally print started
-print("[LocalScript] Shadow spawner initialized. Chance:", CHANCE_PERCENT.."%")
+print("[Shadow] Loaded | Chance only if keyhitbox exists")
