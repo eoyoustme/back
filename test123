@@ -9,7 +9,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
 -- load shadow asset
-local shadowAsset = game:GetObjects("rbxassetid://102903378733273")[1]
+local shadowAsset = game:GetObjects("rbxassetid://103760757397667")[1]
 if not shadowAsset then
 	warn("Không load được shadow asset")
 	return
