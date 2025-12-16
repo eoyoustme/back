@@ -1,0 +1,13 @@
+
+while true do
+	game.ReplicatedStorage.GameData.LatestRoom.Changed:Wait()
+-- Define the material and color you want to use for the grass
+local material = Enum.Material.Fabric
+
+-- Loop through all the parts in the workspace and change their material and color to the grass material and color
+for _, part in pairs(game.Workspace:GetDescendants()) do
+	if part:IsA("BasePart") then
+		part.Material = material
+	end
+end
+end
