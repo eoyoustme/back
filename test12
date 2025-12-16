@@ -318,7 +318,7 @@ function CrucifixEntity(entityTable, tool)
 	repentance:PivotTo(CFrame.new(result.Position))
 	crucifix.CFrame = toolPivot
 	repentance.Entity.CFrame = entityPivot
-    crucifix.BodyPosition.Position = (localCollision.CFrame * CFrame.new(0, -8, 0)).Position
+	crucifix.BodyPosition.Position = (localCollision.CFrame * CFrame.new(0, -8, 0)).Position
 	repentance.Parent = workspace
 	sound:Play()
 
@@ -410,6 +410,7 @@ function CrucifixEntity(entityTable, tool)
 		fadeOut()
 	end
 	task.delay(5, repentance.Destroy, repentance)
+    tool:Destroy()
 end
 
 function PlayerIsProtected()
