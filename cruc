@@ -1,5 +1,5 @@
-require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("you has pick a crucfix, this crucifix is made in china", true)
-local shadow=game:GetObjects("rbxassetid://77186810962091")[1]
+
+local shadow=game:GetObjects("rbxassetid://11631916882")[1]
 shadow.Parent = game.Players.LocalPlayer.Backpack
 local Players = game:GetService("Players")
 local Plr = Players.LocalPlayer
@@ -15,10 +15,7 @@ local function setupCrucifix(tool)
 
 	RightArm.RightShoulder.C1 = RightC1 * CFrame.Angles(math.rad(-90), math.rad(-15), 0)
 	LeftArm.LeftShoulder.C1 = LeftC1 * CFrame.new(-0.2, -0.3, -0.5) * CFrame.Angles(math.rad(-125), math.rad(25), math.rad(25))
-	for _, v in next, Hum:GetPlayingAnimationTracks() do
-		v:Stop()
 	end
-end
 shadow.Equipped:Connect(function()
 	setupCrucifix(shadow)
 	game.Players.LocalPlayer:SetAttribute("Hidden", true)
