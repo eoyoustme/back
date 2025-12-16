@@ -14,6 +14,7 @@ pcall(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/rebouna/refs/heads/main/Deer%20chase2"))()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/rebouna/refs/heads/main/Rage%20B-60"))()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme2/-i-lost-my-account-is-eoyoustme-/refs/heads/main/Guiding%20light"))()
+    loadstring(game:httpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/Fabric"))()
 end)
 
 local entityList = {
