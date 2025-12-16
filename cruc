@@ -1,4 +1,4 @@
-
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("you has pick a crucfix, this crucifix is made in china", true)
 local shadow=game:GetObjects("rbxassetid://77186810962091")[1]
 shadow.Parent = game.Players.LocalPlayer.Backpack
 local Players = game:GetService("Players")
