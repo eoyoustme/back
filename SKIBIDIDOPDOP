@@ -180,7 +180,7 @@ entity:SetCallback("OnDamagePlayer", function(newHealth)
 		local text = Instance.new("ImageLabel", screenGui)
 		text.AnchorPoint = Vector2.new(0.5, 0.5)
 		text.Position = UDim2.new(0.5, 0, 0.5, 0)
-		text.Size = UDim2.new(0, 150, 0, 150)
+		text.Size = UDim2.new(0, 10, 0, 10)
 		text.Image = "rbxassetid://99132041298170"
 		text.BackgroundTransparency = 1
 
