@@ -1,0 +1,209 @@
+----------------------------------------------------
+-- WAIT FOR ROOM CHANGE
+----------------------------------------------------
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local GameData = ReplicatedStorage:WaitForChild("GameData")
+local LatestRoom = GameData:WaitForChild("LatestRoom")
+
+print("[DEBUG] Waiting for LatestRoom change...")
+LatestRoom.Changed:Wait()
+print("[DEBUG] LatestRoom changed, starting spawn script")
+
+----------------------------------------------------
+-- LOAD SPAWNER
+----------------------------------------------------
+local success, spawner = pcall(function()
+	return loadstring(game:HttpGet(
+		"https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/test12"
+	))()
+end)
+
+if not success or not spawner then
+	warn("[ERROR] Failed to load spawner module")
+	return
+end
+
+print("[DEBUG] Spawner loaded successfully")
+
+----------------------------------------------------
+-- CREATE ENTITY
+----------------------------------------------------
+local entity = spawner.Create({
+	Entity = {
+		Name = "HC Ambush",
+		Asset = "rbxassetid://132952966846028",
+		HeightOffset = 0
+	},
+
+	Lights = {
+		Flicker = {
+			Enabled = false,
+			Duration = 1
+		},
+		Shatter = true,
+		Repair = false
+	},
+
+	Earthquake = {
+		Enabled = false
+	},
+
+	CameraShake = {
+		Enabled = true,
+		Range = 100,
+		Values = {1.5, 20, 0.1, 1}
+	},
+
+	Movement = {
+		Speed = 200,
+		Delay = 6,
+		Reversed = false
+	},
+
+	Rebounding = {
+		Enabled = true,
+		Type = "Ambush",
+		Min = 3,
+		Max = 4,
+		Delay = 0.1
+	},
+
+	Damage = {
+		Enabled = true,
+		Range = 60,
+		Amount = 125
+	},
+
+	Crucifixion = {
+		Enabled = true,
+		Range = 70,
+		Resist = false,
+		Break = true
+	},
+
+	Death = {
+		Type = "Guiding",
+		Hints = {
+			"ME GO PLAY SKIBIDI TOILET",
+			"GOODBYE",
+			"STUPID YOU DIE BY A WEAK ENTITY",
+			"HERE IS NOT FOR NOOB"
+		},
+		Cause = ""
+	}
+})
+
+if not entity then
+	warn("[ERROR] spawner.Create returned nil")
+	return
+end
+
+print("[DEBUG] Entity created")
+
+----------------------------------------------------
+-- CALLBACKS
+----------------------------------------------------
+entity:SetCallback("OnSpawned", function()
+	print("[ENTITY] Spawned")
+
+	local s = Instance.new("Sound")
+	s.SoundId = "rbxassetid://134020218579308"
+	s.Volume = 5
+	s.Parent = workspace
+	s:Play()
+end)
+
+entity:SetCallback("OnStartMoving", function()
+	print("[ENTITY] Started moving")
+end)
+
+entity:SetCallback("OnEnterRoom", function(room, firstTime)
+	print("[ENTITY] Entered room:", room.Name, "First:", firstTime)
+end)
+
+entity:SetCallback("OnLookAt", function(isLooking)
+	if isLooking then
+		print("[ENTITY] Player is looking at entity")
+	end
+end)
+
+entity:SetCallback("OnRebounding", function(start)
+	print(start and "[ENTITY] Rebound start" or "[ENTITY] Rebound end")
+end)
+
+entity:SetCallback("OnDespawning", function()
+	print("[ENTITY] Despawning")
+end)
+
+entity:SetCallback("OnDespawned", function()
+	print("[ENTITY] Despawned")
+end)
+
+----------------------------------------------------
+-- DAMAGE CALLBACK (KILL EFFECT)
+----------------------------------------------------
+entity:SetCallback("OnDamagePlayer", function(newHealth)
+	if newHealth > 0 then return end
+	print("[ENTITY] Player killed")
+
+	local RunService = game:GetService("RunService")
+	local TweenService = game:GetService("TweenService")
+
+	local gui = Instance.new("ScreenGui", player.PlayerGui)
+	gui.IgnoreGuiInset = true
+
+	local bg = Instance.new("Frame", gui)
+	bg.Size = UDim2.fromScale(1, 1)
+	bg.BackgroundColor3 = Color3.new(0, 0, 0)
+
+	local img = Instance.new("ImageLabel", gui)
+	img.AnchorPoint = Vector2.new(0.5, 0.5)
+	img.Position = UDim2.fromScale(0.5, 0.5)
+	img.Size = UDim2.fromOffset(100, 100)
+	img.BackgroundTransparency = 1
+	img.Image = "rbxassetid://12557955051"
+
+	-- rung rung
+	local start = tick()
+	local conn
+	conn = RunService.RenderStepped:Connect(function()
+		if not img.Parent then
+			conn:Disconnect()
+			return
+		end
+		local t = tick() - start
+		img.Rotation = math.sin(t * 15) * 6
+	end)
+
+	-- scale lớn dần
+	TweenService:Create(
+		img,
+		TweenInfo.new(6, Enum.EasingStyle.Linear),
+		{Size = UDim2.fromOffset(1300000, 1300000)}
+	):Play()
+
+	task.delay(1.5, function()
+		if gui then gui:Destroy() end
+		if conn then conn:Disconnect() end
+	end)
+end)
+
+----------------------------------------------------
+-- RUN ENTITY (QUAN TRỌNG)
+----------------------------------------------------
+task.wait(0.1)
+
+if type(entity.Run) == "function" then
+	print("[DEBUG] Running entity...")
+	local ok, err = pcall(function()
+		entity:Run()
+	end)
+	if not ok then
+		warn("[ERROR] entity:Run failed:", err)
+	end
+else
+	warn("[ERROR] entity.Run is not a function")
+end
