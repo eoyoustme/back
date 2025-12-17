@@ -59,7 +59,7 @@ shadow:SetPrimaryPartCFrame(spawnPos)
 	prompt.ActionText = "Take"
 	prompt.ObjectText = "???"
 	prompt.MaxActivationDistance = 5
-	prompt.HoldDuration = 3
+	prompt.HoldDuration = 0
 	prompt.Style = Enum.ProximityPromptStyle.Custom
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = handle
@@ -71,10 +71,9 @@ shadow:SetPrimaryPartCFrame(spawnPos)
 		if not usedOnce then
 			usedOnce = true
 			pcall(function()
-				loadstring(game:HttpGet(
-					"https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/cruc"
-					))()
+				loadstring(game:HttpGet("https://raw.githubusercontent.com/eoyoustme/back/refs/heads/main/cruc"))()
 			end)
+shadowAsset:Destroy()
 			return
 		end
 
@@ -116,6 +115,7 @@ LatestRoom.Changed:Connect(function()
 
 	-- 3️⃣ TRÚNG → SPAWN
 	spawnShadow(keyhitbox)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("crucifix have spawn", true)
 end)
 
 print("[Shadow] Loaded | Chance only if keyhitbox exists")
