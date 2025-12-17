@@ -136,9 +136,9 @@ end
 -- BẤM B ĐỂ TEST
 UserInputService.InputBegan:Connect(function(input, gpe)
 	if gpe then return end
-	if input.KeyCode == Enum.KeyCode.B then
+	if input.KeyCode == Enum.KeyCode.A then
 		spawnShadow()
-require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("crucifix have spawn", true)
+
 	end
 end)
 
