@@ -109,7 +109,7 @@ LatestRoom.Changed:Connect(function()
 	end
 
 	-- 2️⃣ CHỈ LÚC NÀY MỚI RANDOM
-	if math.random(33, 100) > 100 then
+	if math.random(53, 100) > 100 then
 		return
 	end
 
