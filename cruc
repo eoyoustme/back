@@ -29,4 +29,4 @@ shadow.Unequipped:Connect(function()
 	RightArm.RightShoulder.C1 = RightC1
 	LeftArm.LeftShoulder.C1 = LeftC1
 end)
-require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("You pick a China crucifix, only work for custom entities, true)
+
