@@ -6,7 +6,12 @@ cue2.Volume = 45
 cue2.PlaybackSpeed = 1
 cue2:Play()
 
-wait(1)
+local a = game.ReplicatedStorage.GameData.LatestRoom.Changed:Connect(function()
+game.Players.LocalPlayer.Character.Humanoid:TakeDamage(1000)
+game:GetService("ReplicatedStorage").GameStats["Player_".. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "Hunger [Opened Door]"
+end)
+wait(30.5)
+a:Disconnect()
 
 -- Check current room
 local entityModel = true
