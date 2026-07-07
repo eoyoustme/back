@@ -10,7 +10,7 @@ local a = game.ReplicatedStorage.GameData.LatestRoom.Changed:Connect(function()
 game.Players.LocalPlayer.Character.Humanoid:TakeDamage(1000)
 game:GetService("ReplicatedStorage").GameStats["Player_".. game.Players.LocalPlayer.Name].Total.DeathCause.Value = "Hunger [Opened Door]"
 end)
-wait(30.5)
+wait(16.5)
 a:Disconnect()
 
 -- Check current room
