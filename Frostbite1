@@ -85,7 +85,7 @@ pcall(function() entity.AmbienceFar:Stop() end)
 local pointLight = Instance.new("PointLight")
 pointLight.Color = Color3.new(255, 255, 255)
 pointLight.Range = 60
-pointLight.Brightness = 99999
+pointLight.Brightness = 0
 pointLight.Parent = entity
 
 tweenservice:Create(pointLight, TweenInfo.new(3), {Brightness = 0}):Play()
