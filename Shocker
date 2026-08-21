@@ -49,7 +49,6 @@ local function spawnShocker()
         local dot = directionToShocker:Dot(playerLookVector)
 
         if dot > 0.85 then
-            -- Đang nhìn
             if not lookStart then
                 lookStart = tick()
             elseif tick() - lookStart >= lookDuration then
@@ -60,14 +59,12 @@ local function spawnShocker()
                 if boneSound then boneSound:Play() end
                 humanoid:TakeDamage(30)
 
-                -- Tween lao tới player
                 local targetPos = character.HumanoidRootPart.Position + Vector3.new(0, 2, 0)
                 local tweenInfo = TweenInfo.new(1.2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
                 local tween = TweenService:Create(oogaBoogaaPart, tweenInfo, {Position = targetPos})
                 tween:Play()
 
                 tween.Completed:Connect(function()
-                    -- Sau khi lao tới thì rơi xuống đất
                     fallToGround()
                 end)
 
@@ -79,13 +76,11 @@ local function spawnShocker()
                 }, "Blue")
             end
         else
-            -- Không nhìn → ngã luôn
             connection:Disconnect()
             fallToGround()
         end
     end)
 
-    -- Dự phòng
     task.delay(5, function()
         if not hasTriggered and not hasFallen then
             fallToGround()
